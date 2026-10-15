@@ -12,7 +12,8 @@
     "build": "vite build && node scripts/generate-sw.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "test": "vitest run",
-    "check": "tsc --noEmit && npm test && npm run build"
+    "check": "tsc --noEmit && npm test && npm run build && npm run checklist",
+    "checklist": "node scripts/check-buildathon.mjs"
   },
   "dependencies": {},
   "devDependencies": {

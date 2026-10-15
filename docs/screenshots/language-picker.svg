@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">SafeHands language picker preview</title>
+  <desc id="desc">A clean language-first SafeHands screen with five native-name buttons and an offline privacy note.</desc>
+  <rect width="900" height="600" fill="#f0f7fb"/>
+  <rect x="120" y="54" width="660" height="492" rx="28" fill="#fff" stroke="#b6c8d6" stroke-width="2"/>
+  <circle cx="188" cy="132" r="28" fill="#075985"/>
+  <text x="188" y="142" text-anchor="middle" font-family="sans-serif" font-size="26" fill="#fff">✋</text>
+  <text x="235" y="119" font-family="sans-serif" font-size="14" font-weight="700" fill="#075985">SAFEHANDS</text>
+  <text x="235" y="154" font-family="sans-serif" font-size="32" font-weight="700" fill="#102a43">Choose your language</text>
+  <text x="235" y="182" font-family="sans-serif" font-size="16" fill="#486581">Clear help for health and safety, even offline.</text>
+  <g font-family="sans-serif" font-size="18" font-weight="700" fill="#102a43">
+    <rect x="170" y="230" width="260" height="70" rx="14" fill="#fff" stroke="#075985" stroke-width="2"/><text x="195" y="272">English</text>
+    <rect x="470" y="230" width="260" height="70" rx="14" fill="#fff" stroke="#b6c8d6" stroke-width="2"/><text x="495" y="272">Nigerian Pidgin</text>
+    <rect x="170" y="320" width="260" height="70" rx="14" fill="#fff" stroke="#b6c8d6" stroke-width="2"/><text x="195" y="362">हिन्दी</text>
+    <rect x="470" y="320" width="260" height="70" rx="14" fill="#fff" stroke="#b6c8d6" stroke-width="2"/><text x="495" y="362">Yorùbá</text>
+    <rect x="170" y="410" width="260" height="70" rx="14" fill="#fff" stroke="#b6c8d6" stroke-width="2"/><text x="195" y="452">Hausa</text>
+  </g>
+  <text x="470" y="444" font-family="sans-serif" font-size="14" fill="#486581">Machine-drafted translations</text>
+</svg>

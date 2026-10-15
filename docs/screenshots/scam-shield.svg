@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600" role="img" aria-labelledby="title desc">
+  <title id="title">SafeHands Scam Shield preview</title>
+  <desc id="desc">A Scam Shield result showing a scam verdict, score, highlighted UPI text, reasons, and safe actions.</desc>
+  <rect width="900" height="600" fill="#f0f7fb"/>
+  <rect x="42" y="28" width="816" height="544" rx="18" fill="#fff" stroke="#b6c8d6" stroke-width="2"/>
+  <rect x="42" y="28" width="816" height="72" rx="18" fill="#06456b"/>
+  <text x="76" y="73" font-family="sans-serif" font-size="25" font-weight="700" fill="#fff">✋ SafeHands</text>
+  <text x="670" y="72" font-family="sans-serif" font-size="14" fill="#dff3ff">Offline-ready</text>
+  <text x="78" y="147" font-family="sans-serif" font-size="30" font-weight="700" fill="#102a43">Scam Shield</text>
+  <text x="78" y="177" font-family="sans-serif" font-size="16" fill="#486581">Paste or type a suspicious message. Nothing leaves this device.</text>
+  <rect x="78" y="204" width="744" height="70" rx="12" fill="#f8fafc" stroke="#b6c8d6" stroke-width="2"/>
+  <text x="100" y="246" font-family="sans-serif" font-size="17" fill="#102a43">Urgent: approve this UPI collect request and</text>
+  <rect x="100" y="253" width="190" height="22" rx="4" fill="#ffd166" opacity=".75"/>
+  <text x="100" y="271" font-family="sans-serif" font-size="17" font-weight="700" fill="#102a43">enter your PIN</text>
+  <rect x="78" y="300" width="744" height="220" rx="14" fill="#fee2e2" stroke="#991b1b" stroke-width="3"/>
+  <text x="104" y="344" font-family="sans-serif" font-size="15" font-weight="700" fill="#991b1b">SAFETY CHECK</text>
+  <text x="104" y="382" font-family="sans-serif" font-size="32" font-weight="800" fill="#991b1b">SCAM</text>
+  <text x="690" y="380" font-family="sans-serif" font-size="19" font-weight="700" fill="#991b1b">92 / 100</text>
+  <text x="104" y="421" font-family="sans-serif" font-size="16" fill="#102a43">• A PIN cannot be used to receive money.</text>
+  <text x="104" y="450" font-family="sans-serif" font-size="16" fill="#102a43">• It creates urgent pressure and asks for a secret.</text>
+  <text x="104" y="479" font-family="sans-serif" font-size="16" fill="#102a43">Do not reply, pay, click, or share an OTP/PIN.</text>
+  <rect x="104" y="494" width="200" height="40" rx="9" fill="#991b1b"/>
+  <text x="204" y="520" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#fff">🔊 Read aloud</text>
+</svg>

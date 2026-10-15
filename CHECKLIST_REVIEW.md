@@ -1,6 +1,6 @@
 # SafeHands safety red-team and buildathon checklist
 
-**Review status (2026-10-15):** no application, package, test, or documentation files are present yet. The only workspace entries found are OmniRush metadata under `.omnirush/`. Therefore no triage or Scam Shield implementation could be executed in this pass. Use this artifact as the acceptance checklist when the other work lands.
+**Review status (2026-10-16):** integrated MVP review complete. The deterministic engines, PWA shell, tests, docs, and clean-machine configuration are present. Local TypeScript, Vitest, Vite build, locale, bundle, service-worker, privacy-path, and axe checks pass. Docker execution remains an environment check: run the commands in the Docker section when Docker Engine is installed.
 
 ## Release gates
 
@@ -99,6 +99,19 @@ Perform these checks after implementation:
 - README documents the product scope, non-diagnostic/non-guaranteed nature of outputs, local-only data handling, offline guarantee, emergency limitations, known false positives/negatives, and how to report a safety issue.
 - The implementation documents its rule precedence (especially negation and multi-symptom aggregation) so later edits cannot silently reintroduce keyword-only behavior.
 
+## Integration evidence
+
+- [x] `git rev-parse --verify HEAD` succeeds; the repository has a root commit and later integration commits.
+- [x] `package-lock.json`, `.nvmrc` (`22.14.0`), `Dockerfile`, `README.md`, `.env.example`, and portable npm scripts exist.
+- [x] `npx tsc --noEmit` passes.
+- [x] `npm test` passes: 3 test files, 27 tests, including the 64-message corpus, health adversarial cases, locale parity, DOM paths, and axe-core on the language, home, triage, Scam Shield, facilities, reminders, and settings screens.
+- [x] `npm run build` passes. The generated service worker precaches the built shell plus `data/triage-protocol.json`, `data/facilities.json`, `data/scam-fixtures.json`, and all locale JSON assets.
+- [x] `npm run checklist` passes. The current initial JavaScript bundle is 42,073 bytes gzipped, below the 200 KB target; no absolute machine paths or secret-like literals were found in app/config/docs.
+- [x] User text is escaped before rendering; scam links are displayed as highlighted text and are never fetched or followed by the engine.
+- [x] Raw triage/scam text is not written to localStorage or IndexedDB. Only preferences and reminders are persisted.
+- [x] The UI keeps a typed/chip path when voice is unavailable, gives visual and read-aloud result controls, and shows emergency wording without relying on color alone.
+- [ ] Docker proof must be run on a host with Docker Engine: `docker build -t safehands:local .` followed by `docker run --rm --network none safehands:local npm test`.
+
 ## Current review conclusion
 
-No implementation was available to test, so there are no engine pass/fail claims. Before integration is accepted, attach test output for the matrices above and resolve any case that produces false reassurance, unsafe action, secret collection, network traffic, XSS, inaccessible emergency guidance, or nondeterministic results.
+The local buildathon checklist is green. The remaining unchecked item is an execution-environment proof, not a source gap: this workspace does not have a `docker` executable. Do not claim the Docker build/test proof until those exact commands have been run on a machine with Docker Engine available.
