@@ -110,8 +110,8 @@ Perform these checks after implementation:
 - [x] User text is escaped before rendering; scam links are displayed as highlighted text and are never fetched or followed by the engine.
 - [x] Raw triage/scam text is not written to localStorage or IndexedDB. Only preferences and reminders are persisted.
 - [x] The UI keeps a typed/chip path when voice is unavailable, gives visual and read-aloud result controls, and shows emergency wording without relying on color alone.
-- [ ] Docker proof must be run on a host with Docker Engine: `docker build -t safehands:local .` followed by `docker run --rm --network none safehands:local npm test`.
+- [ ] Docker proof must be run on a host with Docker Engine: `docker build -t safehands:local .` followed by `docker run --rm --network none safehands:local npm test`. Both exact commands were attempted here on 2026-10-16 but Windows reported that `docker` is not installed, so no Docker result is claimed.
 
 ## Current review conclusion
 
-The local buildathon checklist is green. The remaining unchecked item is an execution-environment proof, not a source gap: this workspace does not have a `docker` executable. Do not claim the Docker build/test proof until those exact commands have been run on a machine with Docker Engine available.
+The local buildathon checklist is green. The remaining unchecked item is an execution-environment proof, not a source gap: this workspace does not have a `docker` executable (`docker` was not recognized). Do not claim the Docker build/test proof until those exact commands have been run on a machine with Docker Engine available.
