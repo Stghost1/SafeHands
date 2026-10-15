@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title">
+  <title>SafeHands</title>
+  <rect width="192" height="192" rx="42" fill="#075985"/>
+  <circle cx="96" cy="96" r="68" fill="#dff3ff" opacity=".18"/>
+  <path d="M61 96c-9-10-22-24-27-16-5 8 8 27 19 38 8 8 19 15 31 18 14 4 31-2 40-14l26-34c6-8 4-18-3-22-6-3-12 1-18 8l-18 22V57c0-8-5-13-12-13-6 0-11 5-11 13v28l-7-37c-1-8-7-12-13-11-7 1-10 7-9 15l4 34-10-28c-3-8-9-11-15-8-7 3-8 10-5 18l16 39z" fill="#fff"/>
+  <path d="M99 83V56M84 86l-4-34M70 88l-7-29" fill="none" stroke="#075985" stroke-width="5" stroke-linecap="round"/>
+</svg>

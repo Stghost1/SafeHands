@@ -1,0 +1,656 @@
+{
+  "version": "1.0.0",
+  "disclaimer": "SafeHands provides triage and navigation guidance only; it is not medical advice. It cannot diagnose illness or replace a clinician. If someone may be in immediate danger, call local emergency services now.",
+  "emergencyCallNumbers": {
+    "DEFAULT": ["112"],
+    "NG": ["112"],
+    "IN": ["112", "108"]
+  },
+  "default": {
+    "urgency": "urgent",
+    "label": "Urgent assessment recommended",
+    "icon": "⚠️",
+    "reasons": [
+      "The description does not clearly match a supported lower-urgency pathway.",
+      "When symptoms are unclear, it is safer to arrange a clinician assessment rather than assume that nothing serious is happening."
+    ],
+    "actionSteps": [
+      "Arrange a same-day assessment at a clinic or hospital.",
+      "Keep the person with someone trusted and note when the symptoms started and whether they are worsening.",
+      "Call local emergency services immediately if breathing, consciousness, severe pain, heavy bleeding, or sudden weakness changes."
+    ],
+    "doNotDo": [
+      "Do not use this result to rule out a serious problem.",
+      "Do not drive if the person is faint, confused, severely unwell, or unable to travel safely."
+    ],
+    "escalation": [
+      "Escalate to emergency help now for trouble breathing, unresponsiveness, a seizure, severe bleeding, sudden one-sided weakness, or rapidly worsening symptoms."
+    ]
+  },
+  "hardRedFlags": [
+    {
+      "id": "not-breathing-or-unresponsive",
+      "phrases": [
+        "not breathing",
+        "stopped breathing",
+        "cannot wake up",
+        "can't wake up",
+        "not waking up",
+        "passed out and not waking",
+        "will not wake up",
+        "won't wake up",
+        "not responding",
+        "unresponsive"
+      ],
+      "keywords": ["unconscious", "collapsed"],
+      "reason": "The message describes absent breathing, unresponsiveness, or a person who cannot be woken.",
+      "actionSteps": [
+        "Call local emergency services now and put the phone on speaker.",
+        "Check for normal breathing and follow the emergency dispatcher's instructions.",
+        "If the person is not breathing normally and you are trained, start CPR while help is coming."
+      ],
+      "doNotDo": [
+        "Do not leave the person alone.",
+        "Do not give food, drink, or tablets to an unresponsive person."
+      ],
+      "escalation": [
+        "This is an immediate emergency; do not wait for a clinic appointment."
+      ]
+    },
+    {
+      "id": "severe-breathing-distress",
+      "phrases": [
+        "cannot breathe",
+        "can't breathe",
+        "cannot catch my breath",
+        "can't catch my breath",
+        "gasping for air",
+        "struggling to breathe",
+        "severe trouble breathing",
+        "lips are blue",
+        "blue lips",
+        "turning blue",
+        "choking"
+      ],
+      "keywords": ["gasping", "cyanosis"],
+      "reason": "The message describes severe breathing difficulty or a sign that oxygen may be dangerously low.",
+      "actionSteps": [
+        "Call local emergency services now.",
+        "Keep the person sitting upright in the position that makes breathing easiest and loosen tight clothing.",
+        "Use a prescribed rescue inhaler or prescribed emergency medicine only as directed."
+      ],
+      "doNotDo": [
+        "Do not make the person lie flat if that makes breathing harder.",
+        "Do not wait to see whether severe breathing difficulty settles."
+      ],
+      "escalation": [
+        "If the person becomes drowsy, blue, or unable to speak, treat it as an immediate emergency."
+      ]
+    },
+    {
+      "id": "stroke-signs",
+      "phrases": [
+        "face is drooping",
+        "face droop",
+        "one side of my face",
+        "one sided weakness",
+        "one-sided weakness",
+        "arm is weak",
+        "speech is slurred",
+        "slurred speech",
+        "cannot speak",
+        "can't speak",
+        "sudden confusion",
+        "sudden trouble seeing"
+      ],
+      "keywords": ["stroke", "aphasia"],
+      "reason": "The message includes sudden one-sided weakness, facial change, speech change, confusion, or vision change.",
+      "actionSteps": [
+        "Call local emergency services now and note the last time the person was known to be well.",
+        "Keep the person safe, supported, and under observation while help is coming.",
+        "Take a list of medicines and relevant medical information if it is immediately available."
+      ],
+      "doNotDo": [
+        "Do not drive the person yourself if an ambulance is available.",
+        "Do not give food, drink, or unprescribed medicine while swallowing may be affected."
+      ],
+      "escalation": [
+        "Even if the signs improve, emergency assessment is still needed now."
+      ]
+    },
+    {
+      "id": "dangerous-chest-symptoms",
+      "phrases": [
+        "crushing chest pain",
+        "heavy chest pain",
+        "severe chest pressure",
+        "chest pain spreading to my arm",
+        "chest pain spreading to my jaw",
+        "chest pain with sweating",
+        "chest pain with shortness of breath"
+      ],
+      "keywords": ["heartattack", "heart-attack"],
+      "reason": "The message describes severe or spreading chest symptoms or chest symptoms with sweating or breathing difficulty.",
+      "actionSteps": [
+        "Call local emergency services now and stop exertion.",
+        "Sit and rest in a supported position while waiting for help.",
+        "Use only medicines that have already been prescribed for this situation and follow their instructions."
+      ],
+      "doNotDo": [
+        "Do not drive yourself.",
+        "Do not dismiss severe or spreading chest symptoms as indigestion without urgent assessment."
+      ],
+      "escalation": [
+        "Emergency assessment is needed now, even if the symptoms come and go."
+      ]
+    },
+    {
+      "id": "uncontrolled-bleeding",
+      "phrases": [
+        "bleeding will not stop",
+        "bleeding won't stop",
+        "cannot stop the bleeding",
+        "can't stop the bleeding",
+        "blood is spurting",
+        "vomiting blood",
+        "coughing blood",
+        "black tarry stool"
+      ],
+      "keywords": ["uncontrolled bleeding", "haemorrhage", "hemorrhage"],
+      "reason": "The message describes bleeding that is uncontrolled or blood from vomiting, coughing, or stool.",
+      "actionSteps": [
+        "Call local emergency services now.",
+        "For an external wound, press firmly with clean cloth or dressing and keep pressure in place.",
+        "If blood soaks through, add another cloth on top rather than removing the first one."
+      ],
+      "doNotDo": [
+        "Do not remove an object embedded in a wound.",
+        "Do not give food or drink if urgent surgery may be needed."
+      ],
+      "escalation": [
+        "Pale, clammy, faint, confused, or rapidly worsening symptoms make this an immediate emergency."
+      ]
+    },
+    {
+      "id": "severe-allergic-reaction",
+      "phrases": [
+        "swollen tongue",
+        "swollen throat",
+        "facial swelling",
+        "face swelling",
+        "throat is closing",
+        "allergic reaction and trouble breathing",
+        "allergy and trouble breathing",
+        "hives and trouble breathing",
+        "anaphylactic reaction"
+      ],
+      "keywords": ["anaphylaxis", "anaphylactic"],
+      "reason": "The message includes swelling of the airway or a severe allergic reaction with breathing difficulty.",
+      "actionSteps": [
+        "Call local emergency services now.",
+        "Use the person's prescribed adrenaline/epinephrine auto-injector immediately if available, following its instructions.",
+        "Keep the person under observation and use a second prescribed injector only as directed while waiting for help."
+      ],
+      "doNotDo": [
+        "Do not make the person stand or walk if they feel faint.",
+        "Do not rely on an antihistamine alone for airway swelling or breathing difficulty."
+      ],
+      "escalation": [
+        "Symptoms can return after initial improvement; emergency observation is required."
+      ]
+    },
+    {
+      "id": "ongoing-seizure",
+      "phrases": [
+        "seizure lasting",
+        "seizure for more than",
+        "having repeated seizures",
+        "won't stop shaking",
+        "not waking after a seizure"
+      ],
+      "keywords": ["seizure", "convulsion", "convulsions", "status epilepticus"],
+      "reason": "The message describes a prolonged, repeated, or unresolved seizure.",
+      "actionSteps": [
+        "Call local emergency services now.",
+        "Clear nearby objects, protect the head with something soft, and time the seizure.",
+        "When the movement stops, place the person on their side if they are breathing normally and stay with them."
+      ],
+      "doNotDo": [
+        "Do not restrain the person.",
+        "Do not put anything in the person's mouth and do not give food, drink, or tablets until fully alert."
+      ],
+      "escalation": [
+        "A first seizure, injury, pregnancy, breathing problem, or a seizure lasting five minutes or more needs emergency help."
+      ]
+    },
+    {
+      "id": "poisoning-or-overdose",
+      "phrases": [
+        "swallowed poison",
+        "took too many pills",
+        "possible overdose",
+        "chemical exposure",
+        "drank bleach",
+        "drank pesticide"
+      ],
+      "keywords": ["poisoning", "overdose", "poisoned", "toxic"],
+      "reason": "The message suggests a possible poisoning, overdose, or harmful chemical exposure.",
+      "actionSteps": [
+        "Call local emergency services or the local poison service now and keep the container or label nearby.",
+        "Tell responders what was taken, how much, and when, if known.",
+        "Move away from fumes to fresh air only if it is safe to do so."
+      ],
+      "doNotDo": [
+        "Do not make the person vomit.",
+        "Do not give milk, food, or a home remedy unless a poison professional tells you to."
+      ],
+      "escalation": [
+        "Breathing difficulty, drowsiness, seizures, or collapse requires emergency help immediately."
+      ]
+    },
+    {
+      "id": "pregnancy-warning-signs",
+      "requiresPregnancyContext": true,
+      "phrases": [
+        "pregnant and bleeding",
+        "pregnancy bleeding",
+        "pregnant with severe abdominal pain",
+        "pregnant with severe headache",
+        "reduced fetal movement",
+        "baby is not moving"
+      ],
+      "keywords": ["eclampsia"],
+      "reason": "Pregnancy or postpartum symptoms with bleeding, severe pain, severe headache, vision change, or reduced movement need immediate assessment.",
+      "actionSteps": [
+        "Call local emergency services or the maternity emergency service now.",
+        "Do not stay alone; take pregnancy records and medicines if they are immediately available.",
+        "If there is bleeding, note how much and whether there are clots while waiting for help."
+      ],
+      "doNotDo": [
+        "Do not wait for the next routine antenatal appointment.",
+        "Do not take a new medicine or use a home remedy without a clinician's advice."
+      ],
+      "escalation": [
+        "Fainting, heavy bleeding, severe pain, seizure, severe headache, or breathing difficulty is an immediate emergency."
+      ]
+    },
+    {
+      "id": "self-harm-or-suicidal-thoughts",
+      "phrases": [
+        "want to die",
+        "kill myself",
+        "hurt myself",
+        "end my life",
+        "plan to suicide",
+        "suicide plan"
+      ],
+      "keywords": ["suicidal", "self-harm", "selfharm"],
+      "reason": "The message includes thoughts, plans, or actions that could cause immediate harm.",
+      "actionSteps": [
+        "Call local emergency services now or go to the nearest emergency department.",
+        "Stay with the person and move medicines, weapons, poisons, and other immediate means out of reach when it is safe.",
+        "Tell a trusted person and ask them to stay involved until professional help takes over."
+      ],
+      "doNotDo": [
+        "Do not leave the person alone if there may be immediate risk.",
+        "Do not promise secrecy about an immediate safety risk."
+      ],
+      "escalation": [
+        "If harm has already happened or there is a current plan or access to means, treat this as an emergency now."
+      ]
+    },
+    {
+      "id": "severe-infection-warning",
+      "phrases": [
+        "fever and stiff neck",
+        "headache fever stiff neck",
+        "confusion with fever",
+        "severe headache with confusion",
+        "purple spots and fever"
+      ],
+      "keywords": ["stiff neck", "very confused"],
+      "reason": "Fever with a stiff neck, severe headache, confusion, or non-fading purple spots can be an emergency.",
+      "actionSteps": [
+        "Call local emergency services now or go to the nearest emergency department.",
+        "Keep the person with someone trusted and note when the fever and other signs began.",
+        "Do not delay for a home test or routine appointment."
+      ],
+      "doNotDo": [
+        "Do not leave a confused or very unwell person alone.",
+        "Do not give food or drink if the person is drowsy or cannot swallow safely."
+      ],
+      "escalation": [
+        "Worsening drowsiness, a seizure, breathing difficulty, or collapse is an immediate emergency."
+      ]
+    },
+    {
+      "id": "severe-allergy-warning",
+      "phrases": ["severe allergy", "severe allergic reaction"],
+      "keywords": ["anaphylaxis", "anaphylactic"],
+      "reason": "A severe allergy can quickly affect breathing or blood pressure.",
+      "actionSteps": [
+        "Call local emergency services now.",
+        "Use a prescribed adrenaline/epinephrine injector if available and follow its instructions.",
+        "Keep the person under observation while help is coming."
+      ],
+      "doNotDo": [
+        "Do not make the person stand or walk if they feel faint.",
+        "Do not rely on an antihistamine alone for airway swelling or breathing difficulty."
+      ],
+      "escalation": [
+        "Tongue or throat swelling, wheezing, faintness, or blue lips needs emergency help now."
+      ]
+    },
+    {
+      "id": "snakebite",
+      "phrases": ["snake bite", "snakebite", "bitten by a snake", "snake bit me"],
+      "keywords": ["snakebite", "snake bite"],
+      "reason": "A snakebite may cause dangerous venom effects even when the bite looks small.",
+      "actionSteps": [
+        "Call local emergency services and arrange urgent transport to a hospital now.",
+        "Keep the person still, calm, and the bitten limb still and supported below heart level when possible.",
+        "Remember the snake only from a safe distance; do not try to catch it."
+      ],
+      "doNotDo": [
+        "Do not cut, suck, burn, or tie a tight tourniquet around the bite.",
+        "Do not apply herbs, ice, alcohol, or electric shock."
+      ],
+      "escalation": [
+        "Breathing difficulty, weakness, drooping eyelids, bleeding, or collapse is an immediate emergency."
+      ]
+    },
+    {
+      "id": "child-danger-signs",
+      "phrases": ["child cannot drink", "child not feeding", "baby not feeding", "child is very sleepy", "child is unusually sleepy"],
+      "keywords": ["lethargic child", "child convulsion"],
+      "reason": "A child who cannot drink, is not feeding, is unusually sleepy, or has a convulsion needs urgent emergency assessment.",
+      "actionSteps": [
+        "Call local emergency services or go to the nearest hospital now.",
+        "Keep the child with a trusted adult and take any medicines or health records if easy to reach.",
+        "Give nothing by mouth if the child is too sleepy to swallow safely."
+      ],
+      "doNotDo": [
+        "Do not wait for a routine clinic visit when a child is difficult to wake or cannot drink.",
+        "Do not give leftover antibiotics or adult medicines."
+      ],
+      "escalation": [
+        "Breathing difficulty, blue lips, seizure, severe dehydration, or unresponsiveness is an immediate emergency."
+      ]
+    }
+  ],
+  "presentations": [
+    {
+      "id": "chest-pain",
+      "phrases": ["chest pain", "chest pressure", "tightness in my chest", "pain in my chest", "chest discomfort"],
+      "keywords": ["chest"],
+      "urgency": "emergency",
+      "label": "Emergency help for chest symptoms",
+      "icon": "🫀",
+      "reasons": ["Chest pain, pressure, or tightness can need immediate assessment, especially when it is new, severe, or persistent."],
+      "actionSteps": ["Stop exertion and call local emergency services now if the symptom is severe, persistent, or accompanied by breathlessness, sweating, faintness, or spreading pain.", "Sit and rest in a supported position while arranging help."],
+      "doNotDo": ["Do not drive yourself if the symptoms are severe or you feel faint.", "Do not use someone else's medicine."],
+      "escalation": ["Call emergency services immediately for worsening, spreading, or persistent chest symptoms."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "breathing-difficulty",
+      "phrases": ["shortness of breath", "short of breath", "difficulty breathing", "trouble breathing", "breathing problem", "breathless", "breathlessness"],
+      "keywords": ["breathing"],
+      "urgency": "emergency",
+      "label": "Emergency help for breathing difficulty",
+      "icon": "🫁",
+      "reasons": ["New or worsening breathing difficulty can become dangerous quickly and needs prompt assessment."],
+      "actionSteps": ["Call local emergency services now if breathing is severe, worsening, or making it hard to speak.", "Keep the person upright and use only prescribed rescue medicine as directed."],
+      "doNotDo": ["Do not wait for severe breathing difficulty to settle.", "Do not make the person lie flat if that makes breathing harder."],
+      "escalation": ["Blue lips, gasping, confusion, or inability to speak are immediate emergency signs."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "allergic-reaction",
+      "phrases": ["allergic reaction", "allergic rash", "hives"],
+      "keywords": ["allergy", "allergic"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for an allergic reaction",
+      "icon": "⚠️",
+      "reasons": ["A new allergic reaction can worsen, especially when there is swelling, vomiting, dizziness, or any breathing change."],
+      "actionSteps": ["Arrange prompt medical advice and avoid the suspected trigger.", "Use only prescribed allergy medicine or an adrenaline/epinephrine auto-injector according to its instructions."],
+      "doNotDo": ["Do not rely on this result if swelling or breathing difficulty develops.", "Do not take someone else's medicine."],
+      "escalation": ["Call emergency services immediately for tongue or throat swelling, breathing difficulty, faintness, or rapidly worsening symptoms."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "stroke-symptoms",
+      "phrases": ["face drooping", "facial drooping", "weak arm", "weakness on one side", "slurred speech", "sudden confusion", "sudden vision loss", "sudden severe headache"],
+      "keywords": ["stroke", "numbness"],
+      "urgency": "emergency",
+      "label": "Emergency assessment for sudden neurological symptoms",
+      "icon": "🧠",
+      "reasons": ["Sudden weakness, speech change, confusion, vision change, or a severe sudden headache needs emergency assessment."],
+      "actionSteps": ["Call local emergency services now and record when the symptom started or when the person was last known to be well.", "Keep the person safe and supervised while help is coming."],
+      "doNotDo": ["Do not wait to see if the symptoms go away.", "Do not give food, drink, or unprescribed medicine if swallowing may be affected."],
+      "escalation": ["Symptoms that improve still need emergency assessment now."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "severe-bleeding",
+      "phrases": ["heavy bleeding", "a lot of blood", "bleeding heavily", "blood loss", "bleeding after injury"],
+      "keywords": ["bleeding", "bleed"],
+      "urgency": "emergency",
+      "label": "Emergency help for heavy bleeding",
+      "icon": "🩸",
+      "reasons": ["Heavy or ongoing bleeding can become dangerous and needs immediate assessment."],
+      "actionSteps": ["Call local emergency services for heavy, ongoing, or internal bleeding.", "Press firmly on an external wound with clean cloth or dressing and keep the person lying or sitting safely."],
+      "doNotDo": ["Do not remove an embedded object.", "Do not give food or drink while waiting for emergency assessment."],
+      "escalation": ["Faintness, confusion, pale or clammy skin, or bleeding that will not stop is an immediate emergency."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "fever",
+      "phrases": ["high fever", "fever", "temperature", "feels feverish"],
+      "keywords": ["feverish"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for fever",
+      "icon": "🌡️",
+      "reasons": ["Fever with worsening illness, dehydration, confusion, breathing difficulty, a stiff neck, or a new concerning rash needs prompt assessment."],
+      "actionSteps": ["Arrange same-day medical advice, especially if the person is very young, pregnant, older, or has a long-term condition.", "Offer small frequent sips of fluid if the person is awake and able to swallow, and keep a note of the temperature and timing."],
+      "doNotDo": ["Do not give aspirin to a child or combine medicines that contain the same ingredient.", "Do not delay care if the person is becoming drowsy, dehydrated, or difficult to wake."],
+      "escalation": ["Call emergency services for confusion, seizure, severe breathing difficulty, a stiff neck with severe illness, or an unresponsive person."],
+      "pregnancySensitive": true,
+      "infantUnderThreeMonthsUrgency": "emergency"
+    },
+    {
+      "id": "abdominal-pain",
+      "phrases": ["abdominal pain", "stomach pain", "belly pain", "severe tummy pain", "pain in my abdomen"],
+      "keywords": ["abdomen", "tummy"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for abdominal pain",
+      "icon": "⚠️",
+      "reasons": ["New, severe, persistent, or worsening abdominal pain needs prompt assessment."],
+      "actionSteps": ["Arrange same-day medical assessment, sooner if the pain is severe or the person is vomiting, faint, feverish, or unable to keep fluids down.", "Note where the pain is, when it began, and whether there is bleeding, vomiting, or a change in bowel or urine habits."],
+      "doNotDo": ["Do not take someone else's prescription medicine.", "Do not ignore severe or worsening pain."],
+      "escalation": ["Call emergency services for fainting, rigid or swollen abdomen, heavy bleeding, black stool, or rapidly worsening pain."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "vomiting-or-diarrhea",
+      "phrases": ["cannot keep fluids down", "can't keep fluids down", "repeated vomiting", "watery diarrhea", "severe diarrhea", "vomiting and diarrhea"],
+      "keywords": ["vomiting", "diarrhea", "diarrhoea"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for vomiting or diarrhea",
+      "icon": "💧",
+      "reasons": ["Repeated vomiting or diarrhea can cause dangerous dehydration, especially in babies, older adults, and pregnant people."],
+      "actionSteps": ["Arrange same-day medical advice and take small frequent sips of oral rehydration fluid if awake and able to swallow.", "Monitor urine output, alertness, and whether symptoms are worsening."],
+      "doNotDo": ["Do not give anti-diarrhea or anti-vomiting medicine to a child unless a clinician advises it.", "Do not rely on sugary drinks alone for significant dehydration."],
+      "escalation": ["Call emergency services for fainting, confusion, blood, severe pain, very little urine, or inability to keep any fluid down."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "headache",
+      "phrases": ["headache", "bad headache", "migraine"],
+      "keywords": [],
+      "urgency": "urgent",
+      "label": "Prompt assessment for headache",
+      "icon": "🤕",
+      "reasons": ["A new, severe, sudden, or unusual headache needs prompt assessment, particularly with fever, weakness, confusion, vision change, or pregnancy."],
+      "actionSteps": ["Arrange same-day medical advice for a new or severe headache.", "Rest in a quiet place, drink fluids if able, and note when it began and any other symptoms."],
+      "doNotDo": ["Do not ignore a sudden worst-ever headache or new neurological symptoms.", "Do not exceed the label dose of pain medicine."],
+      "escalation": ["Call emergency services for sudden severe headache, confusion, weakness, seizure, fainting, or severe headache during pregnancy."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "dizziness-or-fainting",
+      "phrases": ["feeling dizzy", "dizzy", "feeling faint", "fainted", "passed out", "lightheaded"],
+      "keywords": [],
+      "urgency": "urgent",
+      "label": "Prompt assessment for dizziness or fainting",
+      "icon": "🌀",
+      "reasons": ["New dizziness or fainting can have several causes and needs assessment when it is severe, repeated, or accompanied by other symptoms."],
+      "actionSteps": ["Sit or lie down safely, avoid driving, and arrange prompt medical advice.", "If the person is awake and able to swallow, offer small sips of fluid and note what happened before the episode."],
+      "doNotDo": ["Do not let a faint or very dizzy person stand suddenly.", "Do not drive or operate machinery while symptoms continue."],
+      "escalation": ["Call emergency services for chest pain, breathing difficulty, severe headache, weakness, confusion, injury, or recurrent fainting."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "injury-or-fracture",
+      "phrases": ["broken bone", "suspected fracture", "deep cut", "head injury", "serious injury", "cannot move my limb"],
+      "keywords": ["fracture", "injury", "wound"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for an injury",
+      "icon": "🩹",
+      "reasons": ["A significant injury, possible fracture, deep wound, or head injury should be assessed promptly."],
+      "actionSteps": ["Arrange urgent medical assessment and keep the injured area still and supported.", "For external bleeding, apply firm pressure with a clean dressing unless an object is embedded."],
+      "doNotDo": ["Do not straighten a deformed limb or push a bone back into place.", "Do not remove an embedded object."],
+      "escalation": ["Call emergency services for severe bleeding, loss of consciousness, breathing difficulty, paralysis, or an unsafe scene."],
+      "pregnancySensitive": false
+    },
+    {
+      "id": "burn",
+      "phrases": ["serious burn", "large burn", "deep burn", "chemical burn", "electrical burn", "burn on my face"],
+      "keywords": ["burn", "scald"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for a burn",
+      "icon": "🔥",
+      "reasons": ["Large, deep, chemical, electrical, or face and airway burns need prompt assessment."],
+      "actionSteps": ["Cool a thermal burn under clean running water for 20 minutes when safe, remove jewellery and loose clothing, and arrange urgent care.", "For chemical or electrical burns, move away from the source and call emergency services."],
+      "doNotDo": ["Do not apply ice, butter, oil, toothpaste, or powders.", "Do not pull away clothing stuck to the burn or break blisters."],
+      "escalation": ["Call emergency services for smoke inhalation, breathing difficulty, a large or deep burn, or an electrical or chemical injury."],
+      "pregnancySensitive": false
+    },
+    {
+      "id": "urinary-symptoms",
+      "phrases": ["pain when urinating", "burning when urinating", "blood in urine", "need to pee often"],
+      "keywords": ["urination", "urine"],
+      "urgency": "routine",
+      "label": "Medical review for urinary symptoms",
+      "icon": "💧",
+      "reasons": ["New urinary symptoms should be reviewed, especially with fever, flank pain, vomiting, pregnancy, or blood in the urine."],
+      "actionSteps": ["Arrange a medical review soon and drink normal amounts of fluid if you can.", "Tell the clinician if you are pregnant or have fever, back pain, vomiting, or blood in the urine."],
+      "doNotDo": ["Do not use leftover antibiotics or someone else's prescription.", "Do not delay care when fever, flank pain, vomiting, or pregnancy is involved."],
+      "escalation": ["Escalate urgently for fever with flank pain, vomiting, confusion, inability to pass urine, or pregnancy."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "cough-or-cold",
+      "phrases": ["runny nose", "sore throat", "common cold", "mild cough", "cough and cold"],
+      "keywords": ["cough", "cold"],
+      "urgency": "self-care",
+      "label": "Self-care and monitoring",
+      "icon": "🌿",
+      "reasons": ["Mild cold or cough symptoms without warning signs can often be monitored with supportive care."],
+      "actionSteps": ["Rest, drink fluids, and use simple supportive measures that are safe for the person's age and conditions.", "Monitor for fever, breathing difficulty, dehydration, or symptoms that are worsening or not improving."],
+      "doNotDo": ["Do not use antibiotics left over from another illness.", "Do not give an adult cold medicine to a child without checking the label or asking a clinician or pharmacist."],
+      "escalation": ["Seek prompt care for breathing difficulty, dehydration, persistent high fever, confusion, chest pain, or worsening symptoms."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "skin-rash",
+      "phrases": ["new rash", "skin rash", "itchy rash", "rash and fever"],
+      "keywords": ["rash", "hives"],
+      "urgency": "routine",
+      "label": "Medical review for a new rash",
+      "icon": "🔎",
+      "reasons": ["A new rash should be reviewed if it is widespread, painful, rapidly changing, associated with fever, or affecting a vulnerable person."],
+      "actionSteps": ["Arrange medical advice soon and note when the rash started, what it looks like, and any new medicines or exposures.", "Avoid scratching and use gentle, fragrance-free skin care until reviewed."],
+      "doNotDo": ["Do not apply a strong or borrowed cream without advice.", "Do not ignore a rapidly spreading rash, purple spots, facial swelling, or breathing difficulty."],
+      "escalation": ["Call emergency services for breathing difficulty, facial or tongue swelling, confusion, collapse, or purple spots that do not fade with pressure."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "malaria-like-fever",
+      "phrases": ["fever and chills", "fever with chills", "fever and body aches", "fever after mosquito bite", "very high fever"],
+      "keywords": ["malaria", "chills", "shivering"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for fever or chills",
+      "icon": "🌡️",
+      "reasons": ["Fever with chills or body aches can have several causes and should be checked locally; this result does not diagnose malaria."],
+      "actionSteps": ["Arrange same-day medical advice and ask about a local fever test.", "Drink safe fluids if awake and able to swallow, rest, and note temperature and timing."],
+      "doNotDo": ["Do not assume every fever is malaria or start leftover antibiotics or antimalarial medicine without advice.", "Do not delay care if the person becomes confused, very weak, or unable to drink."],
+      "escalation": ["Call emergency services for confusion, seizure, breathing difficulty, severe dehydration, or an unresponsive person."],
+      "pregnancySensitive": true,
+      "infantUnderThreeMonthsUrgency": "emergency"
+    },
+    {
+      "id": "dehydration-or-cholera-signs",
+      "phrases": ["rice water stool", "profuse watery diarrhea", "profuse watery diarrhoea", "signs of dehydration", "very little urine", "dry mouth and diarrhea"],
+      "keywords": ["cholera", "sunken eyes", "dehydrated"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for watery diarrhea or dehydration",
+      "icon": "💧",
+      "reasons": ["Large amounts of watery stool or signs of dehydration can become dangerous quickly and need local medical advice."],
+      "actionSteps": ["Start small, frequent sips of oral rehydration solution if the person is awake and can swallow.", "Arrange same-day care and tell the clinic about watery stool, urine output, vomiting, and anyone else who is ill."],
+      "doNotDo": ["Do not make a child wait if they are sleepy or cannot drink.", "Do not use unsafe water or rely on alcohol, sugary drinks, or antibiotics without advice."],
+      "escalation": ["Call emergency services for fainting, confusion, very little urine, blood, severe pain, or inability to keep fluids down."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "cough-with-fever",
+      "phrases": ["cough with fever", "coughing blood", "cough for many days", "persistent cough"],
+      "keywords": ["cough"],
+      "urgency": "routine",
+      "label": "Review a cough and monitor warning signs",
+      "icon": "🫁",
+      "reasons": ["A cough can have many causes. Fever, blood, weight loss, chest pain, or a cough that persists needs medical review."],
+      "actionSteps": ["Arrange a clinic review if the cough is persistent, worsening, or joined by fever or blood.", "Rest, drink fluids if safe, and avoid smoke and close contact when feverish."],
+      "doNotDo": ["Do not use leftover antibiotics or someone else's inhaler.", "Do not ignore breathing difficulty or blue lips."],
+      "escalation": ["Call emergency services for severe breathing difficulty, blue lips, confusion, or coughing a large amount of blood."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "snakebite-aftercare",
+      "phrases": ["was bitten by a snake", "snake bite yesterday", "snakebite swelling"],
+      "keywords": ["snakebite"],
+      "urgency": "emergency",
+      "label": "Emergency assessment for a possible snakebite",
+      "icon": "🐍",
+      "reasons": ["Snakebite effects can worsen after the bite and need hospital assessment."],
+      "actionSteps": ["Call local emergency services and go to a hospital now.", "Keep still and remove rings or tight items from the limb before swelling grows."],
+      "doNotDo": ["Do not cut, suck, burn, or tightly tie the bite.", "Do not take alcohol or apply herbs or chemicals."],
+      "escalation": ["Any weakness, drooping eyelids, bleeding, breathing difficulty, or collapse is an immediate emergency."]
+    },
+    {
+      "id": "high-blood-sugar-warning",
+      "phrases": ["very thirsty and urinating often", "fruity breath", "deep rapid breathing", "blood sugar is very high", "diabetes and vomiting"],
+      "keywords": ["high blood sugar", "hyperglycemia", "diabetic"],
+      "urgency": "urgent",
+      "label": "Prompt assessment for high blood sugar warning signs",
+      "icon": "🧃",
+      "reasons": ["Very high blood sugar with vomiting, deep breathing, confusion, or severe thirst can become dangerous."],
+      "actionSteps": ["Arrange same-day medical assessment and bring the meter reading or medicine list if available.", "Offer normal safe fluids if awake and able to swallow, and keep the person supervised."],
+      "doNotDo": ["Do not change insulin or diabetes medicine doses without the person's care plan.", "Do not give food or drink to a confused or drowsy person."],
+      "escalation": ["Call emergency services for confusion, severe weakness, vomiting, deep breathing, fainting, or inability to wake."],
+      "pregnancySensitive": true
+    },
+    {
+      "id": "mental-health-crisis",
+      "phrases": ["feel unsafe with myself", "might hurt myself", "cannot keep myself safe", "someone may hurt themselves"],
+      "keywords": ["panic attack", "mental health crisis", "self harm"],
+      "urgency": "urgent",
+      "label": "Prompt support for a mental-health crisis",
+      "icon": "🫶",
+      "reasons": ["Feeling unsafe or unable to stay safe needs calm, human support and prompt professional help."],
+      "actionSteps": ["Stay with a trusted person and contact local emergency services or a crisis service today.", "Move medicines, weapons, poisons, and other immediate means away when safe to do so.", "Use slow breathing and a quiet place only while arranging real human support."],
+      "doNotDo": ["Do not leave someone alone when there may be immediate danger.", "Do not promise secrecy about an immediate safety risk."],
+      "escalation": ["A current plan, access to means, an attempt, or worsening distress is an emergency now."]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "safehands",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Offline-first health triage and scam safety PWA for the Frontier Buildathon.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.14.0 <23"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build && node scripts/generate-sw.mjs",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "check": "tsc --noEmit && npm test && npm run build"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "22.15.21",
+    "axe-core": "4.10.2",
+    "jsdom": "26.1.0",
+    "typescript": "5.8.3",
+    "vite": "7.1.5",
+    "vitest": "3.2.4"
+  }
+}
