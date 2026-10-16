@@ -134,6 +134,23 @@ describe("SafeHands user paths", () => {
     expect(document.documentElement.lang).toBe("hi");
     expect(appRoot().textContent).toContain("स्वास्थ्य");
   });
+
+  it("toggles appearance settings when the visible switch is clicked", () => {
+    const settings = appRoot().querySelector<HTMLElement>('[data-action="navigate"][data-screen="settings"]');
+    settings?.click();
+
+    for (const name of ["easyMode", "darkMode", "highContrast", "reducedMotion", "dyslexia"] as const) {
+      const checkbox = appRoot().querySelector<HTMLInputElement>(`[data-setting="${name}"]`);
+      const visibleSwitch = appRoot().querySelector<HTMLLabelElement>(`label.toggle[for="setting-${name}"]`);
+      expect(checkbox, name).toBeTruthy();
+      expect(visibleSwitch, name).toBeTruthy();
+      expect(checkbox?.checked, name).toBe(false);
+      visibleSwitch?.click();
+      expect(checkbox?.checked, name).toBe(true);
+      expect(getAppStateForTests().preferences[name], name).toBe(true);
+      expect(appRoot().classList.contains(name === "easyMode" ? "easy-mode" : name === "highContrast" ? "high-contrast" : name === "darkMode" ? "dark-mode" : name === "reducedMotion" ? "reduce-motion" : "dyslexia-friendly"), name).toBe(true);
+    }
+  });
 });
 
 describe("SafeHands accessibility contract", () => {

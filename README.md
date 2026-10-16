@@ -56,6 +56,8 @@ npm run build
 npm run preview
 ```
 
+On Windows, double-click [`start.bat`](start.bat) for a quick development launch. It resolves the project folder relative to the batch file, runs `npm ci` only when dependencies are missing, starts Vite in a separate window, and opens `http://localhost:5173/`. It requires Node.js in the Node 22 line with npm available.
+
 The service worker is registered from the same origin. Load the app once while connected so the shell is cached, then test the triage and Scam Shield flows in airplane mode. The built worker precaches the hashed app assets, protocol JSON, facility JSON, Scam Shield corpus, locales, manifest, and icons.
 
 ## Test and build commands

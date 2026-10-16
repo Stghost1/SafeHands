@@ -804,6 +804,7 @@ mark {
   border: 2px solid var(--border);
   border-radius: 999px;
   background: var(--surface-soft);
+  cursor: pointer;
 }
 
 .toggle input {
@@ -811,6 +812,11 @@ mark {
   width: 1px;
   height: 1px;
   opacity: 0;
+}
+
+.toggle:focus-within {
+  outline: 4px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .toggle::after {

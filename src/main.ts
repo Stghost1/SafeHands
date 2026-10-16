@@ -781,7 +781,10 @@ function renderSettings(): string {
   const toggle = (name: keyof Preferences, label: MessageKey): string => `
     <li class="setting-row">
       <label for="setting-${name}">${escapeHtml(message(label))}</label>
-      <span class="toggle"><input id="setting-${name}" type="checkbox" data-setting="${name}" ${state.preferences[name] === true ? "checked" : ""} /><span class="live-region">${escapeHtml(message(label))}</span></span>
+      <label class="toggle" for="setting-${name}">
+        <input id="setting-${name}" type="checkbox" data-setting="${name}" ${state.preferences[name] === true ? "checked" : ""} />
+        <span class="toggle-indicator" aria-hidden="true"></span>
+      </label>
     </li>`;
 
   return `
