@@ -1,0 +1,22 @@
+name: SafeHands CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-docker-test:
+    name: Build and test Docker image offline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t safehands:test .
+
+      - name: Run tests without network access
+        run: docker run --rm --network none safehands:test npm test
