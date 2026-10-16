@@ -100,6 +100,49 @@ describe("SafeHands deterministic triage", () => {
     expect(triage("very thirsty and urinating often").presentation).toBe("high-blood-sugar-warning");
   });
 
+  it("provides bounded waiting-care guidance for supported emergency groups", () => {
+    const emergencyInputs = [
+      "I cannot breathe",
+      "one side of my face is drooping",
+      "the bleeding will not stop",
+      "they are unresponsive",
+      "they are having a seizure",
+      "possible overdose",
+      "severe allergy",
+      "I am pregnant and bleeding",
+      "I was bitten by a snake",
+      "a serious burn and serious injury with trouble breathing",
+      "I want to die",
+      "child cannot drink and is very sleepy"
+    ];
+
+    for (const input of emergencyInputs) {
+      const result = triage(input);
+      expect(result.urgency, input).toBe("emergency");
+      expect(result.waitingCare.length, input).toBeGreaterThan(1);
+      expect(result.waitingCare[0], input).toMatch(/call emergency services first/i);
+      expect(result.waitingCare.join(" "), input).toMatch(/while emergency help is on the way/i);
+      expect(result.waitingCare.join(" "), input).toMatch(/do not delay or replace ambulance or clinician care/i);
+      expect(result.waitingCare.join(" "), input).toMatch(/unprescribed medication/i);
+    }
+  });
+
+  it("does not expose emergency waiting-care instructions for non-emergency results", () => {
+    const urgent = triage("fever");
+    const routine = triage("pain when urinating");
+    const selfCare = triage("runny nose");
+    const nonEmergencyInjury = triage("serious burn");
+
+    expect(urgent.urgency).toBe("urgent");
+    expect(routine.urgency).toBe("routine");
+    expect(selfCare.urgency).toBe("self-care");
+    expect(nonEmergencyInjury.urgency).toBe("urgent");
+    expect(urgent.waitingCare).toEqual([]);
+    expect(routine.waitingCare).toEqual([]);
+    expect(selfCare.waitingCare).toEqual([]);
+    expect(nonEmergencyInjury.waitingCare).toEqual([]);
+  });
+
   it("bounds long and malformed input without returning reassuring self-care", () => {
     const result = triage(`${"unknown ".repeat(20000)}\u200b🫥`);
     expect(result.urgency).toBe("urgent");

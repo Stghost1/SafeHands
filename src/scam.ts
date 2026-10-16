@@ -22,7 +22,14 @@ export type ScamCategory =
   | "jobs-loans-investment"
   | "impersonation"
   | "whatsapp"
-  | "link";
+  | "link"
+  | "phishing"
+  | "qr-payment"
+  | "social-media"
+  | "voice-call"
+  | "fake-support"
+  | "giveaway-prize-charity"
+  | "family-emergency";
 
 export interface ScamMatch {
   /** Stable rule identifier, useful for analytics and targeted UI copy. */
@@ -101,6 +108,13 @@ const CATEGORY_CAPS: Record<ScamCategory, number> = {
   impersonation: 42,
   whatsapp: 32,
   link: 40,
+  phishing: 30,
+  "qr-payment": 30,
+  "social-media": 30,
+  "voice-call": 24,
+  "fake-support": 30,
+  "giveaway-prize-charity": 30,
+  "family-emergency": 32,
 };
 
 const INDIA_REPORTING = [
@@ -164,7 +178,7 @@ function hasNegativeContext(text: string, start: number, end: number): boolean {
   // a phrase such as "last warning" remains useful evidence on its own.
   if (
     /\b(?:never|don't|dont|do not|avoid|beware|protect yourself|stay safe)\b/.test(before) ||
-    /\b(?:warning|beware|advice|tip|tips|educational|training|example)\b/.test(before)
+    /\b(?:warning|beware|advice|tip|tips|educational|training|example|guide|guidance|lesson|learn|article|explains|information)\b/.test(before)
   ) {
     return true;
   }
@@ -188,6 +202,13 @@ function hasNegativeContext(text: string, start: number, end: number): boolean {
     return true;
   }
   if (/\b(?:not|no)\s+(?:a\s+)?scam\b/.test(local)) return true;
+  if (
+    /\b(?:safety|security|public\s+service|family)\s+(?:tip|tips|warning|guide|advice|reminder)\b/.test(before) ||
+    /\b(?:scam|scams|phishing|fraud|fake)\b[^.!?\n]{0,45}\b(?:is|are|can|may|often|usually|example|warning)\b/.test(before) ||
+    /\b(?:this|that|these)\s+(?:is|are)\s+(?:a\s+)?(?:scam|fraud|hoax)\b/.test(before)
+  ) {
+    return true;
+  }
   if (/\b(?:scams?|fraud|fake|hoax)\b[^.!?\n]{0,25}\b(?:fake|common|warning|hoax|fraud)\b/.test(after)) return true;
   if (
     /\b(?:processed|credited|received|settled|paid)\b/.test(phrase) &&
@@ -378,6 +399,183 @@ function scanMessagePatterns(source: ScanSource, findings: Finding[]): void {
     /\b(?:https?|www|bank|secure|account|login)\s+dot\s+[a-z0-9-]+\s+dot\s+[a-z]{2,}\b|[\u200B-\u200D\uFEFF]/i,
     { skipNegative: false },
   );
+
+  // Email, login, and password-reset phishing.  These rules describe the
+  // action being requested rather than treating the words "email" or
+  // "password" alone as proof of a scam.  The gate keeps long ordinary
+  // messages cheap to scan.
+  if (/\b(?:email|e-mail|inbox|login|log\s*in|sign\s*in|password|reset|account\s+verification)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "phishing-login-request",
+      "phishing",
+      24,
+      "It looks like a fake sign-in or password-reset message that wants you to use a link or enter account details.",
+      /\b(?:click|open|tap|follow|visit|use)\b[^\n]{0,65}\b(?:login|log\s*in|sign\s*in|password|passcode|account|reset|verify)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "phishing-reset-request",
+      "phishing",
+      22,
+      "It connects a password reset or sign-in alert to a link, reply, or urgent account change.",
+      /\b(?:password\s*reset|reset\s+your\s+password|login\s+alert|sign[- ]?in\s+alert|account\s+verification)\b[^\n]{0,80}\b(?:click|link|open|enter|confirm|verify|update|reply)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "phishing-email-action",
+      "phishing",
+      14,
+      "It uses an email or inbox message to push a sign-in, verification, or password action; check the official app instead.",
+      /\b(?:email|e-mail|inbox)\b[^\n]{0,70}\b(?:password\s*reset|login|log\s*in|sign\s*in|verify\s+account|account\s+(?:suspended|expired)|security\s+alert)\b/i,
+    );
+  }
+
+  // Payment requests that use a QR code.  A QR code can make it easy to
+  // approve a payment, so "scan this to receive money" is explained plainly.
+  if (/\bqr(?:\s*code)?\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "qr-payment-request",
+      "qr-payment",
+      24,
+      "It asks you to scan a QR code or approve a payment to receive money; scanning can send money instead.",
+      /\b(?:scan|open|use|point\s+(?:your|the)\s+phone\s+at)\b[^\n]{0,30}\bqr(?:\s*code)?\b[^\n]{0,75}\b(?:pay|payment|send|transfer|approve|accept|receive|refund|cash|money|prize)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "qr-payment-term",
+      "qr-payment",
+      12,
+      "It puts a QR code next to a payment or money request; verify the payee in your own payment app first.",
+      /\bqr(?:\s*code)?\b[^\n]{0,60}\b(?:pay|payment|send|transfer|approve|accept|receive|refund|cash|money)\b/i,
+    );
+  }
+
+  // Delivery and courier notices often begin with a harmless-looking
+  // tracking or address prompt before asking for a fee or a click.
+  if (/\b(?:delivery|courier|parcel|package|shipment)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "courier-tracking-action",
+      "courier",
+      14,
+      "It uses a parcel or delivery notice to make you track, confirm an address, or use a link; check the order in the official app.",
+      /\b(?:delivery|courier|parcel|package|shipment)\b[^\n]{0,80}\b(?:track(?:ing)?|address|redeliver|reschedule|confirm|click|link)\b/i,
+    );
+  }
+
+  // Social-media recovery and verification messages, including services
+  // other than WhatsApp.
+  if (/\b(?:facebook|instagram|tiktok|twitter|x\s+account|snapchat|telegram|social[- ]media|social\s+account)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "social-account-recovery",
+      "social-media",
+      20,
+      "It asks for a social-media recovery or verification step that could let someone take over the account.",
+      /\b(?:facebook|instagram|tiktok|twitter|x\s+account|snapchat|telegram|social[- ]media|social\s+account)\b[^\n]{0,80}\b(?:recover|recovery|verify|verification|login|log\s*in|sign\s*in|code|password|locked|suspend|takeover|hack)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "social-code-request",
+      "social-media",
+      26,
+      "It asks for a social-media login or recovery code; keep that code private because it can unlock the account.",
+      /\b(?:send|share|forward|tell|read|provide|enter)\b[^\n]{0,45}\b(?:facebook|instagram|tiktok|twitter|snapchat|telegram|social)\b[^\n]{0,35}\b(?:code|otp|password|verification)\b/i,
+    );
+  }
+
+  // Voice-call and WhatsApp scripts are included because the same pressure
+  // tactics can arrive by phone rather than in a text message.
+  if (/\b(?:caller|phone\s+call|voice\s+call|video\s+call|whatsapp\s+call|call)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "voice-call-script",
+      "voice-call",
+      18,
+      "It uses a phone, voice, or video call script to ask for a secret, payment, or urgent action; hang up and call back using a trusted number.",
+      /\b(?:caller|phone\s+call|voice\s+call|video\s+call|whatsapp\s+call|call)\b[^\n]{0,80}\b(?:otp|pin|password|passcode|verification\s+code|transfer|send|pay|install|remote|urgent|secret|gift\s*card)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "voice-call-request-reversed",
+      "voice-call",
+      16,
+      "It brings a secret or payment request into a phone conversation; a genuine service should let you call back through its known number.",
+      /\b(?:otp|pin|password|passcode|verification\s+code|transfer|send|pay)\b[^\n]{0,65}\b(?:caller|phone\s+call|voice\s+call|video\s+call|whatsapp\s+call)\b/i,
+    );
+  }
+
+  // Fake support and remote-access requests deserve their own explanation so
+  // an older person can see the immediate device-safety step.
+  if (/\b(?:IT|technical|customer|bank|account|wallet|help|service|security)\s+(?:support|help\s*desk|team|agent|desk)\b|\b(?:remote[- ]?control|remote access|screen sharing|anydesk|teamviewer|rustdesk|quick support)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "fake-support-access",
+      "fake-support",
+      22,
+      "It claims to be support and asks to install software, share your screen, or give device access; an unexpected caller should not control your device.",
+      /\b(?:IT|technical|customer|bank|account|wallet|help|service|security)\s+(?:support|help\s*desk|team|agent|desk)\b[^\n]{0,85}\b(?:install|download|remote|screen|anydesk|teamviewer|rustdesk|allow|access|control|transfer|password|code)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "fake-support-remote-term",
+      "fake-support",
+      12,
+      "It mentions remote-control or screen-sharing software; do not give an unexpected caller access to your device.",
+      /\b(?:remote[- ]?control|remote access|screen sharing|anydesk|teamviewer|rustdesk|quick support)\b/i,
+    );
+  }
+
+  // Giveaways, prizes, grants, and charity lures use the same advance-fee
+  // pattern but are named separately so the result can explain the promise.
+  if (/\b(?:giveaway|prize|winner|won|lottery|grant|charity|donation|relief|scholarship)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "giveaway-prize-charity-fee",
+      "giveaway-prize-charity",
+      22,
+      "It promises a prize, giveaway, grant, or charity help but asks for a fee, payment, or secret first.",
+      /\b(?:giveaway|prize|winner|won|lottery|grant|charity|donation|relief|scholarship)\b[^\n]{0,90}\b(?:fee|tax|pay|send|transfer|claim|processing|activation|registration|donate|wallet|code)\b/i,
+    );
+  }
+
+  // Family-emergency scams often use a new number and ask the recipient not
+  // to check with anyone else.  Do not rely on a name or phone number.
+  if (/\b(?:mom|mum|mother|dad|father|brother|sister|son|daughter|child|grandson|granddaughter|grandchild|nephew|niece|uncle|aunt|friend|relative|family|accident|hospital|emergency|stranded|arrested|bail)\b/i.test(source.text)) {
+    addPattern(
+      findings,
+      source,
+      "family-emergency-request",
+      "family-emergency",
+      28,
+      "It pretends to be family or a friend in an emergency and asks for money; call that person on a number you already know.",
+      /\b(?:mom|mum|mother|dad|father|brother|sister|son|daughter|child|grandson|granddaughter|grandchild|nephew|niece|uncle|aunt|friend|relative|family)\b[^\n]{0,90}\b(?:accident|hospital|emergency|stranded|arrested|bail|new\s+number|phone\s+(?:lost|stolen)|lost\s+phone|stolen\s+phone|need(?:s)?\s+money|send\s+money|transfer|gift\s*card|urgent)\b/i,
+    );
+    addPattern(
+      findings,
+      source,
+      "family-emergency-reversed",
+      "family-emergency",
+      24,
+      "It combines an emergency story with a request to pay or send money; verify the person before helping.",
+      /\b(?:accident|hospital|emergency|stranded|arrested|bail|new\s+number|phone\s+(?:lost|stolen)|lost\s+phone|stolen\s+phone)\b[^\n]{0,70}\b(?:mom|mum|mother|dad|father|brother|sister|son|daughter|child|grandson|granddaughter|grandchild|nephew|niece|uncle|aunt|friend|relative|family)\b[^\n]{0,50}\b(?:send|transfer|pay|money|help)\b/i,
+    );
+  }
 
   // OTPs, PINs, identity numbers, and card details.
   addPattern(
@@ -836,6 +1034,13 @@ function scoreFindings(findings: Finding[]): number {
   if (has("impersonation") && has("urgency")) score += 8;
   if (has("advance-fee") && (has("urgency") || has("link"))) score += 7;
   if (has("refund") && (has("credentials") || has("link") || has("urgency"))) score += 7;
+  if (has("phishing") && (has("credentials") || has("link") || has("urgency"))) score += 10;
+  if (has("qr-payment") && (has("upi") || has("link") || has("urgency"))) score += 8;
+  if (has("social-media") && (has("credentials") || has("whatsapp") || has("link"))) score += 10;
+  if (has("voice-call") && (has("credentials") || has("impersonation") || has("urgency"))) score += 6;
+  if (has("fake-support") && (has("credentials") || has("impersonation"))) score += 8;
+  if (has("giveaway-prize-charity") && (has("advance-fee") || has("link") || has("urgency"))) score += 6;
+  if (has("family-emergency") && (has("impersonation") || has("urgency"))) score += 8;
 
   // A direct request for a secret, a UPI PIN-to-receive instruction, a
   // WhatsApp verification code, or the phrase "digital arrest" is already a
@@ -850,6 +1055,8 @@ function scoreFindings(findings: Finding[]): number {
         "whatsapp-code-request",
         "digital-arrest",
         "already-shared-secret",
+        "social-code-request",
+        "family-emergency-request",
       ].includes(finding.id),
     )
   ) {
@@ -895,6 +1102,42 @@ function makeActions(
   if (hasCategory("link")) {
     actions.push("Do not open the link. Open the official app or type the institution's known website yourself instead.");
     actionIds.push("avoid-suspicious-link");
+  }
+  if (hasCategory("phishing")) {
+    actions.push("Do not sign in from the message or email. Open the official app or type the website address you already know.");
+    actionIds.push("avoid-phishing-login");
+  }
+  if (hasCategory("courier")) {
+    actions.push("Do not pay a delivery, customs, or redelivery fee from the message. Check your order in the official shopping or courier app.");
+    actionIds.push("verify-courier-officially");
+  }
+  if (hasCategory("qr-payment")) {
+    actions.push("Do not scan a QR code or approve a payment to receive money. Check the payee in your own payment app first.");
+    actionIds.push("do-not-scan-to-receive");
+  }
+  if (hasCategory("social-media") || hasCategory("whatsapp")) {
+    actions.push("Do not share a social-media or WhatsApp code. Open the app yourself, review linked devices, and remove any device you do not recognize.");
+    actionIds.push("secure-social-account");
+  }
+  if (hasCategory("voice-call")) {
+    actions.push("Hang up and call the person or organization back using a number you already trust. Do not use the caller's number.");
+    actionIds.push("hang-up-call-back");
+  }
+  if (hasCategory("fake-support")) {
+    actions.push("Close the remote session and do not install support software for an unexpected caller. From a trusted device, change passwords and contact official support.");
+    actionIds.push("end-remote-support");
+  }
+  if (hasCategory("jobs-loans-investment")) {
+    actions.push("Do not pay an upfront fee or send money for a guaranteed job, loan, or investment. Check the organization through a known official or regulated source.");
+    actionIds.push("reject-upfront-money-promise");
+  }
+  if (hasCategory("giveaway-prize-charity")) {
+    actions.push("Do not pay a fee or send a code to claim a prize, grant, giveaway, or charity request. Verify the organization using contact details you find yourself.");
+    actionIds.push("verify-prize-or-charity");
+  }
+  if (hasCategory("family-emergency")) {
+    actions.push("Pause and check the emergency by calling your relative or friend on a known number, or ask another family member. Do not keep the request secret.");
+    actionIds.push("verify-family-emergency");
   }
   if (verdict !== "LIKELY SAFE") {
     actions.push("Block and report the sender, save screenshots and transaction details, and tell a trusted person before taking any further step.");

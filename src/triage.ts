@@ -75,6 +75,7 @@ interface ProtocolDefault {
   actionSteps: string[];
   doNotDo: string[];
   escalation: string[];
+  waitingCare: string[];
 }
 
 interface ProtocolRule {
@@ -89,6 +90,7 @@ interface ProtocolRule {
   actionSteps?: string[];
   doNotDo?: string[];
   escalation?: string[];
+  waitingCare?: string[];
   requiresPregnancyContext?: boolean;
   pregnancySensitive?: boolean;
   infantUnderThreeMonthsUrgency?: Urgency;
@@ -97,6 +99,7 @@ interface ProtocolRule {
 export interface TriageProtocol {
   version: string;
   disclaimer: string;
+  waitingCareSafetyBoundary?: string;
   emergencyCallNumbers: Record<string, string[]>;
   default: ProtocolDefault;
   hardRedFlags: ProtocolRule[];
@@ -127,6 +130,8 @@ export interface TriageResult {
   actionSteps: string[];
   doNotDo: string[];
   escalation: string[];
+  /** Short, low-risk steps to use only while emergency help is on the way. */
+  waitingCare: string[];
   emergencyCallNumbers: string[];
   disclaimer: string;
   shareSummary: string;
@@ -524,6 +529,10 @@ function ruleEscalation(rule: ProtocolRule | undefined, fallback: ProtocolDefaul
   return unique(rule?.escalation ?? fallback.escalation);
 }
 
+function ruleWaitingCare(rule: ProtocolRule | undefined, fallback: ProtocolDefault): string[] {
+  return unique(rule?.waitingCare ?? fallback.waitingCare);
+}
+
 function urgencyLabel(urgency: Urgency, currentLabel: string): string {
   if (urgency === "emergency" && !/emergency/i.test(currentLabel)) return "Emergency assessment recommended";
   if (urgency === "urgent" && /self[- ]care|medical review soon/i.test(currentLabel)) {
@@ -598,6 +607,7 @@ export function triage(textOrInput: string | TriageInput, context: TriageContext
   let actionSteps: string[];
   let doNotDo: string[];
   let escalation: string[];
+  let waitingCare: string[];
   let matchedRedFlags: string[];
   let matchedPresentations: string[];
   let uncertainty: boolean;
@@ -613,6 +623,15 @@ export function triage(textOrInput: string | TriageInput, context: TriageContext
     actionSteps = unique(redFlagMatches.flatMap(({ rule }) => ruleActions(rule, fallback)));
     doNotDo = unique(redFlagMatches.flatMap(({ rule }) => ruleDoNotDo(rule, fallback)));
     escalation = unique(redFlagMatches.flatMap(({ rule }) => ruleEscalation(rule, fallback)));
+    // Red flags still control urgency and the main action path. Include any
+    // explicitly matched presentation-specific waiting steps as supplemental
+    // first aid when the message describes more than one emergency group.
+    waitingCare = unique([
+      ...redFlagMatches.flatMap(({ rule }) => ruleWaitingCare(rule, fallback)),
+      ...presentationMatches
+        .filter(({ rule }) => rule.waitingCare)
+        .flatMap(({ rule }) => ruleWaitingCare(rule, fallback))
+    ]);
     uncertainty = false;
     confidence = "high";
   } else if (presentationMatches.length > 0) {
@@ -644,6 +663,7 @@ export function triage(textOrInput: string | TriageInput, context: TriageContext
     actionSteps = ruleActions(best.rule, fallback);
     doNotDo = ruleDoNotDo(best.rule, fallback);
     escalation = ruleEscalation(best.rule, fallback);
+    waitingCare = ruleWaitingCare(best.rule, fallback);
     confidence = uncertainty ? "low" : best.score >= 4 ? "high" : "moderate";
   } else {
     // Unknown input is never labelled self-care. It is escalated to same-day
@@ -653,6 +673,7 @@ export function triage(textOrInput: string | TriageInput, context: TriageContext
     actionSteps = [...fallback.actionSteps];
     doNotDo = [...fallback.doNotDo];
     escalation = [...fallback.escalation];
+    waitingCare = [...fallback.waitingCare];
     matchedRedFlags = [];
     matchedPresentations = [];
     uncertainty = true;
@@ -677,6 +698,10 @@ export function triage(textOrInput: string | TriageInput, context: TriageContext
   const finalActionSteps = unique(actionSteps);
   const finalDoNotDo = unique(doNotDo);
   const finalEscalation = unique(escalation);
+  const waitingCareBoundary = protocol.waitingCareSafetyBoundary?.trim();
+  const finalWaitingCare = urgency === "emergency"
+    ? unique([...(waitingCareBoundary ? [waitingCareBoundary] : []), ...waitingCare])
+    : [];
   const shareSummary = buildShareSummary({
     urgency,
     label,
@@ -698,6 +723,7 @@ export function triage(textOrInput: string | TriageInput, context: TriageContext
     actionSteps: finalActionSteps,
     doNotDo: finalDoNotDo,
     escalation: finalEscalation,
+    waitingCare: finalWaitingCare,
     emergencyCallNumbers,
     disclaimer: protocol.disclaimer,
     shareSummary,

@@ -446,5 +446,182 @@
     "label": "LIKELY SAFE",
     "text": "Investments can lose value; there are no guaranteed returns. Read the regulated provider's risk disclosure first.",
     "link": "https://www.sebi.gov.in"
+  },
+  {
+    "id": "ng-scam-21",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "phishing",
+    "text": "Security email: click the login link and enter your password now or your account will be suspended.",
+    "link": "https://gtbank-login.top/verify"
+  },
+  {
+    "id": "in-scam-21",
+    "country": "India",
+    "label": "SCAM",
+    "category": "phishing",
+    "text": "Password reset alert: open this link and confirm your account before it is closed.",
+    "link": "https://account-password-reset.click/login"
+  },
+  {
+    "id": "ng-scam-22",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "courier",
+    "text": "Courier notice: your package needs address confirmation. Click the tracking link today.",
+    "link": "https://delivery-confirm.click/track"
+  },
+  {
+    "id": "in-susp-05",
+    "country": "India",
+    "label": "SUSPICIOUS",
+    "category": "courier",
+    "text": "Delivery update: confirm your parcel address at https://parcel-update.site before the next attempt.",
+    "link": "https://parcel-update.site"
+  },
+  {
+    "id": "in-scam-22",
+    "country": "India",
+    "label": "SCAM",
+    "category": "qr-payment",
+    "text": "Scan this QR code to receive your refund and approve the payment now.",
+    "link": "https://refund-qr.click"
+  },
+  {
+    "id": "ng-scam-23",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "qr-payment",
+    "text": "Use the QR code to receive money; enter your PIN and approve the payment.",
+    "link": "https://wallet-qr.top/receive"
+  },
+  {
+    "id": "ng-scam-24",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "social-media",
+    "text": "Instagram recovery team: send the verification code so we can restore your account immediately.",
+    "link": "https://instagram-recovery.top"
+  },
+  {
+    "id": "in-scam-23",
+    "country": "India",
+    "label": "SCAM",
+    "category": "social-media",
+    "text": "Facebook verification: forward your login code to prevent account takeover.",
+    "link": "https://facebook-verify.click"
+  },
+  {
+    "id": "ng-scam-25",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "voice-call",
+    "text": "Caller from the bank says read the OTP and transfer the fee now.",
+    "link": "https://bank-call-support.top"
+  },
+  {
+    "id": "in-scam-24",
+    "country": "India",
+    "label": "SCAM",
+    "category": "voice-call",
+    "text": "In India, a caller asks for your password to verify the account; call back using a number you already know."
+  },
+  {
+    "id": "ng-scam-26",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "fake-support",
+    "text": "Technical support says install AnyDesk and allow remote access to fix your wallet immediately.",
+    "link": "https://support-wallet.top"
+  },
+  {
+    "id": "in-scam-25",
+    "country": "India",
+    "label": "SCAM",
+    "category": "fake-support",
+    "text": "IT help desk asks me to download TeamViewer and share my screen to secure the bank account.",
+    "link": "https://bank-helpdesk.click"
+  },
+  {
+    "id": "ng-scam-27",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "jobs-loans-investment",
+    "text": "Work from home job: pay the registration fee to unlock guaranteed weekly income.",
+    "link": "https://quick-job-income.site/start"
+  },
+  {
+    "id": "in-scam-26",
+    "country": "India",
+    "label": "SCAM",
+    "category": "jobs-loans-investment",
+    "text": "Your personal loan is approved. Pay the insurance deposit and processing fee to release funds today.",
+    "link": "https://instant-loan-release.click"
+  },
+  {
+    "id": "ng-scam-28",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "giveaway-prize-charity",
+    "text": "Congratulations, you won a giveaway. Pay the tax and activation fee to claim the prize now.",
+    "link": "https://giveaway-prize.top/claim"
+  },
+  {
+    "id": "in-scam-27",
+    "country": "India",
+    "label": "SCAM",
+    "category": "giveaway-prize-charity",
+    "text": "Charity relief grant selected you. Send the registration fee and your bank code to receive help.",
+    "link": "https://relief-grant.click"
+  },
+  {
+    "id": "ng-scam-29",
+    "country": "Nigeria",
+    "label": "SCAM",
+    "category": "family-emergency",
+    "text": "In Nigeria, Hi Mum, I am stranded after an accident. Please send money to this new number urgently and don't tell anyone."
+  },
+  {
+    "id": "in-scam-28",
+    "country": "India",
+    "label": "SCAM",
+    "category": "family-emergency",
+    "text": "In India, Dad is in hospital; this is his new number. Transfer money for the emergency now."
+  },
+  {
+    "id": "ng-safe-09",
+    "country": "Nigeria",
+    "label": "LIKELY SAFE",
+    "text": "Safety tip: phishing emails are fake. Never click a login link or share your password."
+  },
+  {
+    "id": "ng-safe-10",
+    "country": "Nigeria",
+    "label": "LIKELY SAFE",
+    "text": "Security warning: a QR code can send money. Do not scan one to receive a refund."
+  },
+  {
+    "id": "in-safe-09",
+    "country": "India",
+    "label": "LIKELY SAFE",
+    "text": "Family warning: scammers may pretend to be your child. Call a known number before sending money."
+  },
+  {
+    "id": "in-safe-10",
+    "country": "India",
+    "label": "LIKELY SAFE",
+    "text": "Educational guide: real support will not ask for remote access or a password on an unexpected call."
+  },
+  {
+    "id": "ng-safe-11",
+    "country": "Nigeria",
+    "label": "LIKELY SAFE",
+    "text": "Safety reminder: social media recovery codes are private. Never forward them."
+  },
+  {
+    "id": "in-safe-11",
+    "country": "India",
+    "label": "LIKELY SAFE",
+    "text": "Safety advice: a real courier lets you track a parcel in its official app; no surprise fee is needed."
   }
 ]

@@ -1,4 +1,11 @@
-export type Locale = "en" | "pcm" | "hi" | "yo" | "ha";
+import arabic from "./data/locales/ar.json";
+import bengali from "./data/locales/bn.json";
+import french from "./data/locales/fr.json";
+import portuguese from "./data/locales/pt.json";
+import spanish from "./data/locales/es.json";
+import swahili from "./data/locales/sw.json";
+
+export type Locale = "en" | "pcm" | "hi" | "yo" | "ha" | "ar" | "bn" | "fr" | "pt" | "es" | "sw";
 
 export const LOCALE_OPTIONS: ReadonlyArray<{
   code: Locale;
@@ -10,6 +17,12 @@ export const LOCALE_OPTIONS: ReadonlyArray<{
   { code: "hi", nativeName: "हिन्दी", englishName: "Hindi" },
   { code: "yo", nativeName: "Yorùbá", englishName: "Yoruba" },
   { code: "ha", nativeName: "Hausa", englishName: "Hausa" },
+  { code: "ar", nativeName: "العربية", englishName: "Arabic" },
+  { code: "bn", nativeName: "বাংলা", englishName: "Bengali" },
+  { code: "fr", nativeName: "Français", englishName: "French" },
+  { code: "pt", nativeName: "Português", englishName: "Portuguese" },
+  { code: "es", nativeName: "Español", englishName: "Spanish" },
+  { code: "sw", nativeName: "Kiswahili", englishName: "Swahili" },
 ];
 
 const english = {
@@ -681,6 +694,12 @@ export const localeMessages: Record<Locale, LocaleMessages> = {
     "live.reminderAdded": "An ajiye tunatarwa a wannan na’urar.",
     "error.generic": "Wani abu ya faru. Sake gwadawa ko kira don taimako.",
   }),
+  ar: withEnglish(arabic as Partial<LocaleMessages>),
+  bn: withEnglish(bengali as Partial<LocaleMessages>),
+  fr: withEnglish(french as Partial<LocaleMessages>),
+  pt: withEnglish(portuguese as Partial<LocaleMessages>),
+  es: withEnglish(spanish as Partial<LocaleMessages>),
+  sw: withEnglish(swahili as Partial<LocaleMessages>),
 };
 
 export const localeStorageKey = "safehands.locale";
@@ -722,5 +741,11 @@ export function speechLanguage(locale: Locale): string {
     hi: "hi-IN",
     yo: "yo-NG",
     ha: "ha-NG",
+    ar: "ar-SA",
+    bn: "bn-BD",
+    fr: "fr-FR",
+    pt: "pt-BR",
+    es: "es-ES",
+    sw: "sw-KE",
   }[locale];
 }

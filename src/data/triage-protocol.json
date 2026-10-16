@@ -1,6 +1,7 @@
 {
   "version": "1.0.0",
   "disclaimer": "SafeHands provides triage and navigation guidance only; it is not medical advice. It cannot diagnose illness or replace a clinician. If someone may be in immediate danger, call local emergency services now.",
+  "waitingCareSafetyBoundary": "Safety boundary: Call emergency services first. Use these short steps only while emergency help is on the way. Do not delay or replace ambulance or clinician care. Do not give unprescribed medication. Never give food or drink to an unconscious person. Never cut, suck, or apply a tourniquet for a snakebite. Never restrain a seizure. Do not move a person with a possible spine injury unless there is immediate danger.",
   "emergencyCallNumbers": {
     "DEFAULT": ["112"],
     "NG": ["112"],
@@ -25,6 +26,11 @@
     ],
     "escalation": [
       "Escalate to emergency help now for trouble breathing, unresponsiveness, a seizure, severe bleeding, sudden one-sided weakness, or rapidly worsening symptoms."
+    ],
+    "waitingCare": [
+      "Safety boundary: Call emergency services first. Use these short steps only while emergency help is on the way. Do not delay or replace ambulance or clinician care. Do not give unprescribed medication. Never give food or drink to an unconscious person. Never cut, suck, or apply a tourniquet for a snakebite. Never restrain a seizure. Do not move a person with a possible spine injury unless there is immediate danger.",
+      "Stay with the person, keep them as safe and comfortable as possible, and monitor breathing and responsiveness.",
+      "Follow the emergency dispatcher's instructions while help is coming."
     ]
   },
   "hardRedFlags": [
@@ -55,6 +61,10 @@
       ],
       "escalation": [
         "This is an immediate emergency; do not wait for a clinic appointment."
+      ],
+      "waitingCare": [
+        "Check for normal breathing and follow the emergency dispatcher's instructions while keeping the phone on speaker.",
+        "If the person is not breathing normally and you are trained, start CPR; otherwise stay with them and watch their breathing."
       ]
     },
     {
@@ -85,6 +95,10 @@
       ],
       "escalation": [
         "If the person becomes drowsy, blue, or unable to speak, treat it as an immediate emergency."
+      ],
+      "waitingCare": [
+        "Keep the person upright or in the position that makes breathing easiest and loosen tight clothing.",
+        "Stay with them and watch for worsening breathing or reduced responsiveness."
       ]
     },
     {
@@ -116,6 +130,10 @@
       ],
       "escalation": [
         "Even if the signs improve, emergency assessment is still needed now."
+      ],
+      "waitingCare": [
+        "Keep the person safe and supported, and note when the symptoms started or when they were last known to be well.",
+        "Give nothing by mouth while swallowing may be affected and keep watching their responsiveness."
       ]
     },
     {
@@ -169,6 +187,10 @@
       ],
       "escalation": [
         "Pale, clammy, faint, confused, or rapidly worsening symptoms make this an immediate emergency."
+      ],
+      "waitingCare": [
+        "Press firmly on an external wound with a clean cloth or dressing and keep pressure in place.",
+        "If blood soaks through, add another layer without removing the first; keep the person still and warm."
       ]
     },
     {
@@ -197,6 +219,10 @@
       ],
       "escalation": [
         "Symptoms can return after initial improvement; emergency observation is required."
+      ],
+      "waitingCare": [
+        "Use the person's prescribed adrenaline/epinephrine auto-injector immediately if available and follow its instructions.",
+        "Keep the person under observation; let them sit or lie down if faint and do not let them stand or walk."
       ]
     },
     {
@@ -221,6 +247,10 @@
       ],
       "escalation": [
         "A first seizure, injury, pregnancy, breathing problem, or a seizure lasting five minutes or more needs emergency help."
+      ],
+      "waitingCare": [
+        "Clear nearby hazards, cushion the person's head with something soft, and time the seizure.",
+        "When movement stops, place the person on their side only if they are breathing normally and stay until help arrives."
       ]
     },
     {
@@ -246,6 +276,10 @@
       ],
       "escalation": [
         "Breathing difficulty, drowsiness, seizures, or collapse requires emergency help immediately."
+      ],
+      "waitingCare": [
+        "Keep the container or label nearby and note what was taken, how much, and when if known.",
+        "Move to fresh air only if fumes are present and it is safe; keep watching breathing and alertness."
       ]
     },
     {
@@ -272,6 +306,10 @@
       ],
       "escalation": [
         "Fainting, heavy bleeding, severe pain, seizure, severe headache, or breathing difficulty is an immediate emergency."
+      ],
+      "waitingCare": [
+        "Stay with the person in a safe, comfortable position and note bleeding, pain, contractions, or movement changes.",
+        "Keep pregnancy records and medicines ready for responders if they are easy to reach."
       ]
     },
     {
@@ -297,6 +335,10 @@
       ],
       "escalation": [
         "If harm has already happened or there is a current plan or access to means, treat this as an emergency now."
+      ],
+      "waitingCare": [
+        "Stay with the person, speak calmly, and ask a trusted person to join while help is coming.",
+        "Move medicines, weapons, poisons, and other immediate means out of reach only when it is safe."
       ]
     },
     {
@@ -339,6 +381,10 @@
       ],
       "escalation": [
         "Tongue or throat swelling, wheezing, faintness, or blue lips needs emergency help now."
+      ],
+      "waitingCare": [
+        "Use the person's prescribed adrenaline/epinephrine injector if available and follow its instructions.",
+        "Keep the person under observation; let them sit or lie down if faint and do not let them stand or walk."
       ]
     },
     {
@@ -357,6 +403,10 @@
       ],
       "escalation": [
         "Breathing difficulty, weakness, drooping eyelids, bleeding, or collapse is an immediate emergency."
+      ],
+      "waitingCare": [
+        "Keep the person calm and still; keep the bitten limb still and supported and remove rings or tight items.",
+        "Remember the snake only from a safe distance; do not chase or catch it."
       ]
     },
     {
@@ -375,6 +425,10 @@
       ],
       "escalation": [
         "Breathing difficulty, blue lips, seizure, severe dehydration, or unresponsiveness is an immediate emergency."
+      ],
+      "waitingCare": [
+        "Stay with the child, keep them warm and in a safe position, and monitor breathing and responsiveness.",
+        "Give nothing by mouth if the child is too sleepy to swallow safely."
       ]
     }
   ],
@@ -390,6 +444,10 @@
       "actionSteps": ["Stop exertion and call local emergency services now if the symptom is severe, persistent, or accompanied by breathlessness, sweating, faintness, or spreading pain.", "Sit and rest in a supported position while arranging help."],
       "doNotDo": ["Do not drive yourself if the symptoms are severe or you feel faint.", "Do not use someone else's medicine."],
       "escalation": ["Call emergency services immediately for worsening, spreading, or persistent chest symptoms."],
+      "waitingCare": [
+        "Stop exertion, sit in a supported position, and stay with the person while help is coming.",
+        "Use only medicine already prescribed for this situation and follow its instructions."
+      ],
       "pregnancySensitive": true
     },
     {
@@ -403,6 +461,10 @@
       "actionSteps": ["Call local emergency services now if breathing is severe, worsening, or making it hard to speak.", "Keep the person upright and use only prescribed rescue medicine as directed."],
       "doNotDo": ["Do not wait for severe breathing difficulty to settle.", "Do not make the person lie flat if that makes breathing harder."],
       "escalation": ["Blue lips, gasping, confusion, or inability to speak are immediate emergency signs."],
+      "waitingCare": [
+        "Keep the person upright or in the position that makes breathing easiest and loosen tight clothing.",
+        "Stay with them and use only prescribed rescue medicine as directed."
+      ],
       "pregnancySensitive": true
     },
     {
@@ -429,6 +491,10 @@
       "actionSteps": ["Call local emergency services now and record when the symptom started or when the person was last known to be well.", "Keep the person safe and supervised while help is coming."],
       "doNotDo": ["Do not wait to see if the symptoms go away.", "Do not give food, drink, or unprescribed medicine if swallowing may be affected."],
       "escalation": ["Symptoms that improve still need emergency assessment now."],
+      "waitingCare": [
+        "Keep the person safe and supported, and note when the symptoms started or when they were last known to be well.",
+        "Give nothing by mouth while swallowing may be affected and keep watching their responsiveness."
+      ],
       "pregnancySensitive": true
     },
     {
@@ -442,6 +508,10 @@
       "actionSteps": ["Call local emergency services for heavy, ongoing, or internal bleeding.", "Press firmly on an external wound with clean cloth or dressing and keep the person lying or sitting safely."],
       "doNotDo": ["Do not remove an embedded object.", "Do not give food or drink while waiting for emergency assessment."],
       "escalation": ["Faintness, confusion, pale or clammy skin, or bleeding that will not stop is an immediate emergency."],
+      "waitingCare": [
+        "Press firmly on an external wound with a clean cloth or dressing and keep pressure in place.",
+        "If blood soaks through, add another layer without removing the first; keep the person still and warm."
+      ],
       "pregnancySensitive": true
     },
     {
@@ -469,6 +539,10 @@
       "actionSteps": ["Arrange same-day medical assessment, sooner if the pain is severe or the person is vomiting, faint, feverish, or unable to keep fluids down.", "Note where the pain is, when it began, and whether there is bleeding, vomiting, or a change in bowel or urine habits."],
       "doNotDo": ["Do not take someone else's prescription medicine.", "Do not ignore severe or worsening pain."],
       "escalation": ["Call emergency services for fainting, rigid or swollen abdomen, heavy bleeding, black stool, or rapidly worsening pain."],
+      "waitingCare": [
+        "Keep the person in a safe, comfortable position and stay with them while help is coming.",
+        "Note when the pain began and any bleeding, vomiting, faintness, or worsening symptoms."
+      ],
       "pregnancySensitive": true
     },
     {
@@ -495,6 +569,10 @@
       "actionSteps": ["Arrange same-day medical advice for a new or severe headache.", "Rest in a quiet place, drink fluids if able, and note when it began and any other symptoms."],
       "doNotDo": ["Do not ignore a sudden worst-ever headache or new neurological symptoms.", "Do not exceed the label dose of pain medicine."],
       "escalation": ["Call emergency services for sudden severe headache, confusion, weakness, seizure, fainting, or severe headache during pregnancy."],
+      "waitingCare": [
+        "Keep the person safe and supported, and note when the headache began and whether any new signs are changing.",
+        "Give nothing by mouth if the person is confused, drowsy, or having trouble swallowing."
+      ],
       "pregnancySensitive": true
     },
     {
@@ -521,6 +599,10 @@
       "actionSteps": ["Arrange urgent medical assessment and keep the injured area still and supported.", "For external bleeding, apply firm pressure with a clean dressing unless an object is embedded."],
       "doNotDo": ["Do not straighten a deformed limb or push a bone back into place.", "Do not remove an embedded object."],
       "escalation": ["Call emergency services for severe bleeding, loss of consciousness, breathing difficulty, paralysis, or an unsafe scene."],
+      "waitingCare": [
+        "Keep the injured area still and supported; apply firm pressure to external bleeding unless an object is embedded.",
+        "Do not move a person with a possible spine injury unless there is immediate danger; keep them warm while help is coming."
+      ],
       "pregnancySensitive": false
     },
     {
@@ -534,6 +616,10 @@
       "actionSteps": ["Cool a thermal burn under clean running water for 20 minutes when safe, remove jewellery and loose clothing, and arrange urgent care.", "For chemical or electrical burns, move away from the source and call emergency services."],
       "doNotDo": ["Do not apply ice, butter, oil, toothpaste, or powders.", "Do not pull away clothing stuck to the burn or break blisters."],
       "escalation": ["Call emergency services for smoke inhalation, breathing difficulty, a large or deep burn, or an electrical or chemical injury."],
+      "waitingCare": [
+        "Move away from heat, smoke, chemicals, or electricity only if it is safe; cool a thermal burn with clean running water.",
+        "Keep the injured area still and do not move a person with a possible spine injury unless there is immediate danger."
+      ],
       "pregnancySensitive": false
     },
     {
@@ -625,7 +711,11 @@
       "reasons": ["Snakebite effects can worsen after the bite and need hospital assessment."],
       "actionSteps": ["Call local emergency services and go to a hospital now.", "Keep still and remove rings or tight items from the limb before swelling grows."],
       "doNotDo": ["Do not cut, suck, burn, or tightly tie the bite.", "Do not take alcohol or apply herbs or chemicals."],
-      "escalation": ["Any weakness, drooping eyelids, bleeding, breathing difficulty, or collapse is an immediate emergency."]
+      "escalation": ["Any weakness, drooping eyelids, bleeding, breathing difficulty, or collapse is an immediate emergency."],
+      "waitingCare": [
+        "Keep the person calm and still; keep the bitten limb still and supported and remove rings or tight items.",
+        "Remember the snake only from a safe distance; do not chase or catch it."
+      ]
     },
     {
       "id": "high-blood-sugar-warning",
@@ -650,7 +740,11 @@
       "reasons": ["Feeling unsafe or unable to stay safe needs calm, human support and prompt professional help."],
       "actionSteps": ["Stay with a trusted person and contact local emergency services or a crisis service today.", "Move medicines, weapons, poisons, and other immediate means away when safe to do so.", "Use slow breathing and a quiet place only while arranging real human support."],
       "doNotDo": ["Do not leave someone alone when there may be immediate danger.", "Do not promise secrecy about an immediate safety risk."],
-      "escalation": ["A current plan, access to means, an attempt, or worsening distress is an emergency now."]
+      "escalation": ["A current plan, access to means, an attempt, or worsening distress is an emergency now."],
+      "waitingCare": [
+        "Stay with the person, speak calmly, and ask a trusted person to join while help is coming.",
+        "Move medicines, weapons, poisons, and other immediate means out of reach only when it is safe."
+      ]
     }
   ]
 }

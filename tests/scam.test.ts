@@ -1,11 +1,19 @@
 import { describe, expect, it } from "vitest";
 import fixtureData from "../src/data/scam-fixtures.json";
-import { analyzeScam, type ScamAnalysis, type Verdict } from "../src/scam";
+import {
+  LOCALE_OPTIONS,
+  localeMessages,
+  speechLanguage,
+  t,
+  type Locale,
+} from "../src/i18n";
+import { analyzeScam, type ScamAnalysis, type ScamCategory, type Verdict } from "../src/scam";
 
 interface ScamFixture {
   id: string;
   country: "India" | "Nigeria";
   label: Verdict;
+  category?: ScamCategory;
   text: string;
   link?: string;
 }
@@ -24,6 +32,52 @@ describe("SafeHands deterministic Scam Shield", () => {
     expect(fixtures.filter((fixture) => fixture.label === "SCAM").length).toBeGreaterThanOrEqual(35);
     expect(fixtures.filter((fixture) => fixture.label === "LIKELY SAFE").length).toBeGreaterThanOrEqual(12);
     expect(new Set(fixtures.map((fixture) => fixture.id)).size).toBe(fixtures.length);
+  });
+
+  it("keeps the language picker and synchronous message maps aligned", () => {
+    const expectedCodes: Locale[] = ["en", "pcm", "hi", "yo", "ha", "ar", "bn", "fr", "pt", "es", "sw"];
+    const englishKeys = Object.keys(localeMessages.en).sort();
+    expect(LOCALE_OPTIONS.map((option) => option.code)).toEqual(expectedCodes);
+    expect(new Set(LOCALE_OPTIONS.map((option) => option.nativeName)).size).toBe(expectedCodes.length);
+
+    for (const locale of expectedCodes) {
+      expect(Object.keys(localeMessages[locale]).sort(), locale).toEqual(englishKeys);
+      expect(speechLanguage(locale), locale).toContain("-");
+    }
+
+    for (const locale of ["ar", "bn", "fr", "pt", "es", "sw"] as const) {
+      expect(t(locale, "app.machineDraft"), locale).toMatch(/machine-drafted/i);
+      expect(t(locale, "app.machineDraft"), locale).toMatch(/native speaker review/i);
+      expect(t(locale, "scam.title"), locale).not.toBe(t("en", "scam.title"));
+    }
+  });
+
+  it("covers the expanded scam categories with plain-language reasons and actions", () => {
+    const expectedCategories: ScamCategory[] = [
+      "phishing",
+      "courier",
+      "qr-payment",
+      "social-media",
+      "voice-call",
+      "fake-support",
+      "jobs-loans-investment",
+      "giveaway-prize-charity",
+      "family-emergency",
+    ];
+
+    for (const category of expectedCategories) {
+      const fixture = fixtures.find((candidate) => candidate.category === category);
+      expect(fixture, `fixture for ${category}`).toBeDefined();
+      const result = analyseFixture(fixture!);
+      expect(result.categories, category).toContain(category);
+      expect(result.reasons.join(" "), category).toMatch(/(?:asks|uses|pretends|promises|looks|mentions|connects|claims|puts|combines)/i);
+      expect(result.actions.join(" "), category).toMatch(/(?:do not|don't|never|check|call|hang up|verify|official|trusted|pause)/i);
+    }
+
+    const olderPerson = analyzeScam("Your grandson is in hospital. Send money to this new number now and do not tell the family.");
+    expect(olderPerson.verdict).toBe("SCAM");
+    expect(olderPerson.reasons.join(" ")).toMatch(/family|friend|emergency|money|call/i);
+    expect(olderPerson.actions.join(" ")).toMatch(/known number|family|do not keep|verify/i);
   });
 
   it("returns stable, explainable output and exact highlighting spans", () => {
@@ -111,6 +165,11 @@ describe("SafeHands deterministic Scam Shield", () => {
       "The refund was credited in the official app; no PIN or OTP was needed.",
       "Your refund has been processed automatically; no action is required.",
       "Our urgent team meeting starts at 10; please bring the agenda.",
+      "Safety tip: phishing emails are fake. Never click a login link or share your password.",
+      "Security warning: a QR code can send money. Do not scan one to receive a refund.",
+      "Family warning: scammers may pretend to be your child. Call a known number before sending money.",
+      "Educational guide: real support will not ask for remote access or a password on an unexpected call.",
+      "Safety reminder: social media recovery codes are private. Never forward them.",
     ];
 
     for (const message of adversarial) {
