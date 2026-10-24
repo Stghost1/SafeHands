@@ -177,7 +177,7 @@ describe("SafeHands accessibility contract", () => {
       const run = axeModule.run ?? axeModule.default?.run;
       const results = await run!(document.body);
       expect(results.violations).toEqual([]);
-      for (const screen of ["triage", "scam", "facilities", "reminders", "settings"]) {
+      for (const screen of ["triage", "scam", "climate", "facilities", "reminders", "settings"]) {
         click(`[data-action="navigate"][data-screen="${screen}"]`);
         const screenResults = await run!(document.body);
         expect(screenResults.violations, screen).toEqual([]);
@@ -186,5 +186,5 @@ describe("SafeHands accessibility contract", () => {
       // Integration installs may add axe-core; DOM assertions above remain active here.
       expect(true).toBe(true);
     }
-  }, 30000);
+  }, 90000);
 });

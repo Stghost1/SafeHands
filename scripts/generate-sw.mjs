@@ -12,6 +12,8 @@ function copy(source, destination) {
 copy("src/data/triage-protocol.json", "data/triage-protocol.json");
 copy("src/data/facilities.json", "data/facilities.json");
 copy("src/data/scam-fixtures.json", "data/scam-fixtures.json");
+copy("src/data/climate-protocols.json", "data/climate-protocols.json");
+copy("src/data/authority-directory.json", "data/authority-directory.json");
 copy("src/data/locales", "data/locales");
 
 function filesUnder(directory) {

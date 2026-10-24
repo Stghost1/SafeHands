@@ -1,7 +1,8 @@
 # SafeHands translation status
 
-The Arabic (`ar`), Bengali (`bn`), French (`fr`), Portuguese (`pt`), Spanish
-(`es`), and Swahili (`sw`) locale files are machine-drafted translations.
+The Nigerian Pidgin (`pcm`), Hindi (`hi`), Yoruba (`yo`), Hausa (`ha`), Arabic
+(`ar`), Bengali (`bn`), French (`fr`), Portuguese (`pt`), Spanish (`es`), and
+Swahili (`sw`) locale files are machine-drafted translations.
 They need review by native speakers before being treated as final health or
 safety wording. The picker exposes their native names, and each locale's
 `app.machineDraft` message states this status in the selected language.

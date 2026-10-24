@@ -7,7 +7,23 @@ import {
   type Facility,
   type TriageResult as EngineTriageResult,
 } from "./triage";
-import { saveLocalSetting } from "./storage";
+import { readLocalSetting, saveLocalSetting } from "./storage";
+import {
+  buildSosPayload,
+  climateRisk,
+  fetchOpenMeteoTelemetry,
+  getAuthorityRoute,
+  getAuthorityRoutes,
+  makeRiskRadar,
+  makeHydrationPlan,
+  safeZoneSearchUrl,
+  type ActivityLevel,
+  type ClimateRisk,
+  type ClimateTelemetry,
+  type HydrationPlan,
+  type VulnerableProfile,
+} from "./climate";
+import climateProtocols from "./data/climate-protocols.json";
 import {
   LOCALE_OPTIONS,
   type Locale,
@@ -20,7 +36,7 @@ import {
   t,
 } from "./i18n";
 
-type Screen = "home" | "triage" | "scam" | "facilities" | "reminders" | "settings";
+type Screen = "home" | "triage" | "scam" | "climate" | "facilities" | "reminders" | "settings";
 type TriageLevel = "emergency" | "urgent" | "routine" | "monitor";
 type ScamRisk = "high" | "medium" | "low" | "unknown";
 
@@ -35,6 +51,7 @@ interface TriageResult {
   actionSteps: string[];
   doNotDo: string[];
   escalation: string[];
+  waitingCare: string[];
   emergencyCallNumbers: string[];
   disclaimer: string;
   shareSummary: string;
@@ -95,6 +112,25 @@ interface AppState {
   facilityCity: string;
   facilityLocation: { latitude: number; longitude: number } | null;
   facilityLocationMessage: string;
+  climateTelemetry: ClimateTelemetry | null;
+  climateRisk: ClimateRisk | null;
+  climateError: string;
+  climateLoading: boolean;
+  climateActivity: ActivityLevel;
+  climateProfiles: VulnerableProfile[];
+  climateAnnouncementMinutes: number;
+  climateAnnouncementsEnabled: boolean;
+  hydrationPlan: HydrationPlan | null;
+  hydrationReminderNumber: number;
+  climateProtocolId: string | null;
+  climateProtocolStep: number;
+  climateCountryCode: string;
+  climateSosType: string;
+  climateSosPeople: number;
+  climateSosContact: string;
+  climateBatteryPercent: number | null;
+  climateLowBatteryMode: boolean;
+  climateBeaconActive: boolean;
 }
 
 interface OptionalModule {
@@ -125,10 +161,20 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 interface BrowserWindow extends Window {
   SpeechRecognition?: SpeechRecognitionConstructor;
   webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  getBattery?: () => Promise<BatteryLike>;
+  AudioContext?: typeof AudioContext;
+  webkitAudioContext?: typeof AudioContext;
+}
+
+interface BatteryLike extends EventTarget {
+  level: number;
+  addEventListener(type: "levelchange", listener: () => void): void;
 }
 
 const preferencesStorageKey = "safehands.preferences";
 const remindersStorageKey = "safehands.reminders";
+const climatePreferencesStorageKey = "safehands.climate.preferences";
+const climateTelemetryStorageKey = "safehands.climate.telemetry";
 
 const symptomOptions: Array<{ value: string; label: MessageKey }> = [
   { value: "breathing", label: "triage.symptomBreathing" },
@@ -168,12 +214,18 @@ let triageModulePromise: Promise<OptionalModule | null> | null = null;
 let scamModulePromise: Promise<OptionalModule | null> | null = null;
 let activeRecognition: SpeechRecognitionLike | null = null;
 const reminderTimers = new Map<string, number>();
+let climateAnnouncementTimer: number | null = null;
+let hydrationTimer: number | null = null;
+let climateBeaconTimer: number | null = null;
+let climateAudioContext: AudioContext | null = null;
+let climateBatteryManager: BatteryLike | null = null;
 
 let state: AppState = createInitialState();
 
 function createInitialState(): AppState {
   const locale = getSavedLocale();
   const shareTarget = readShareTarget();
+  const climatePreferences = readClimatePreferences();
   return {
     locale,
     screen: locale && shareTarget ? "scam" : "home",
@@ -197,7 +249,46 @@ function createInitialState(): AppState {
     facilityCity: "Akure",
     facilityLocation: null,
     facilityLocationMessage: "",
+    climateTelemetry: null,
+    climateRisk: null,
+    climateError: "",
+    climateLoading: false,
+    climateActivity: climatePreferences.activity,
+    climateProfiles: climatePreferences.profiles,
+    climateAnnouncementMinutes: climatePreferences.announcementMinutes,
+    climateAnnouncementsEnabled: false,
+    hydrationPlan: null,
+    hydrationReminderNumber: 0,
+    climateProtocolId: null,
+    climateProtocolStep: 0,
+    climateCountryCode: climatePreferences.countryCode,
+    climateSosType: "Medical emergency",
+    climateSosPeople: 1,
+    climateSosContact: "",
+    climateBatteryPercent: null,
+    climateLowBatteryMode: false,
+    climateBeaconActive: false,
   };
+}
+
+function readClimatePreferences(): {
+  activity: ActivityLevel;
+  profiles: VulnerableProfile[];
+  announcementMinutes: number;
+  countryCode: string;
+} {
+  const fallback = { activity: "light" as ActivityLevel, profiles: [] as VulnerableProfile[], announcementMinutes: 120, countryCode: "NG" };
+  try {
+    const saved = JSON.parse(globalThis.localStorage?.getItem(climatePreferencesStorageKey) ?? "null") as Partial<typeof fallback> | null;
+    const profiles = Array.isArray(saved?.profiles) ? saved.profiles.filter((profile): profile is VulnerableProfile => ["pregnant", "infant", "elderly", "outdoor-worker"].includes(String(profile))) : [];
+    const activity = ["rest", "light", "moderate", "heavy"].includes(String(saved?.activity)) ? saved?.activity as ActivityLevel : fallback.activity;
+    const announcementMinutes = typeof saved?.announcementMinutes === "number" && Number.isFinite(saved.announcementMinutes)
+      ? Math.min(240, Math.max(15, saved.announcementMinutes))
+      : fallback.announcementMinutes;
+    return { activity, profiles, announcementMinutes, countryCode: typeof saved?.countryCode === "string" && saved.countryCode ? saved.countryCode : fallback.countryCode };
+  } catch {
+    return fallback;
+  }
 }
 
 function readShareTarget(): { text: string; link: string } | null {
@@ -301,6 +392,7 @@ function applyPreferences(): void {
   root.classList.toggle("dyslexia-friendly", state.preferences.dyslexia);
   root.classList.toggle("text-small", state.preferences.textSize === "small");
   root.classList.toggle("text-large", state.preferences.textSize === "large");
+  root.classList.toggle("low-battery-mode", state.climateLowBatteryMode);
   setDocumentLanguage();
 }
 
@@ -346,6 +438,7 @@ function renderHeader(): string {
     { screen: "home", label: "app.home", icon: "⌂" },
     { screen: "triage", label: "app.triage", icon: "♥" },
     { screen: "scam", label: "app.scamShield", icon: "盾" },
+    { screen: "climate", label: "app.name", icon: "☀" },
     { screen: "facilities", label: "app.facilities", icon: "⌖" },
     { screen: "reminders", label: "app.reminders", icon: "◷" },
     { screen: "settings", label: "app.settings", icon: "⚙" },
@@ -355,7 +448,7 @@ function renderHeader(): string {
       (item) => `
         <li>
           <button type="button" data-action="navigate" data-screen="${item.screen}" aria-current="${state.screen === item.screen ? "page" : "false"}">
-            <span aria-hidden="true">${item.icon}</span> ${escapeHtml(message(item.label))}
+            <span aria-hidden="true">${item.icon}</span> ${escapeHtml(item.screen === "climate" ? "Climate" : message(item.label))}
           </button>
         </li>`,
     )
@@ -502,6 +595,7 @@ function renderTriageResult(): string {
     `${message("triage.resultTitle")}: ${label}.`,
     advice,
     ...result.actionSteps,
+    ...result.waitingCare,
     result.disclaimer,
   ].join(" ");
   const numbers = result.emergencyCallNumbers.length ? result.emergencyCallNumbers : ["112"];
@@ -520,6 +614,7 @@ function renderTriageResult(): string {
       <p class="result-advice">${escapeHtml(advice)}</p>
       ${renderItems(message("app.why"), result.reasons)}
       ${renderItems(message("app.actionSteps"), result.actionSteps, true)}
+      ${result.waitingCare.length ? renderItems("While waiting for emergency help", result.waitingCare) : ""}
       ${renderItems(message("app.doNotDo"), result.doNotDo)}
       ${renderItems(message("app.escalation"), result.escalation)}
       <p class="disclaimer"><strong>${escapeHtml(message("app.disclaimer"))}:</strong> ${escapeHtml(result.disclaimer)}</p>
@@ -660,6 +755,152 @@ function renderScam(): string {
         <h2 id="scam-safety-title">${escapeHtml(message("app.safety"))}</h2>
         <p>${escapeHtml(message("scam.highAdvice"))}</p>
       </section>
+    </div>`;
+}
+
+function climateMetric(label: string, value: string, detail = ""): string {
+  return `<article class="climate-metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</article>`;
+}
+
+function renderClimateProtocol(): string {
+  if (!state.climateProtocolId) return "";
+  const protocol = climateProtocols.find((item) => item.id === state.climateProtocolId);
+  if (!protocol) return "";
+  const total = protocol.steps.length;
+  const index = Math.min(state.climateProtocolStep, total - 1);
+  const currentStep = protocol.steps[index] ?? protocol.steps[0];
+  const speech = `${protocol.title}. Step ${index + 1} of ${total}. ${currentStep}`;
+  return `
+    <section class="card protocol-card" aria-labelledby="protocol-title">
+      <div class="result-heading">
+        <div><p class="eyebrow">Interactive emergency protocol</p><h2 id="protocol-title">${escapeHtml(protocol.title)}</h2></div>
+        <span class="level-badge">Step ${index + 1}/${total}</span>
+      </div>
+      <p>${escapeHtml(protocol.summary)}</p>
+      <div class="protocol-step" aria-live="polite"><strong>${escapeHtml(currentStep)}</strong></div>
+      <div class="action-row">
+        <button class="button button-secondary button-icon" type="button" data-action="speak" data-speak="${escapeAttribute(speech)}">🔊 Read this step</button>
+        <button class="button button-primary" type="button" data-action="protocol-next" ${index >= total - 1 ? "disabled" : ""}>Next step</button>
+        <button class="button button-quiet" type="button" data-action="protocol-close">Close protocol</button>
+      </div>
+      <div class="protocol-progress" role="progressbar" aria-label="Protocol progress" aria-valuemin="1" aria-valuemax="${total}" aria-valuenow="${index + 1}"><span style="width:${((index + 1) / total) * 100}%"></span></div>
+      <section class="result-block"><h3>What not to do</h3><ul>${protocol.doNotDo.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>
+    </section>`;
+}
+
+function renderClimate(): string {
+  const telemetry = state.climateTelemetry;
+  const risk = state.climateRisk;
+  const radar = telemetry ? makeRiskRadar(telemetry, state.climateProfiles) : [];
+  const routes = getAuthorityRoutes().filter((route) => route.countryCode !== "DEFAULT");
+  const profileOptions: Array<[VulnerableProfile, string]> = [
+    ["pregnant", "Pregnant person"],
+    ["infant", "Infant or young child"],
+    ["elderly", "Older adult"],
+    ["outdoor-worker", "Outdoor worker or driver"],
+  ];
+  const sosText = buildSosPayload({
+    crisisType: state.climateSosType,
+    people: state.climateSosPeople,
+    vulnerable: state.climateProfiles,
+    latitude: telemetry?.latitude,
+    longitude: telemetry?.longitude,
+    batteryPercent: state.climateBatteryPercent ?? undefined,
+    temperatureC: telemetry?.temperatureC,
+    countryCode: state.climateCountryCode,
+    contact: state.climateSosContact,
+  });
+  const authority = getAuthorityRoute(state.climateCountryCode);
+  const protocolButtons = climateProtocols.map((protocol) => `
+    <button class="protocol-launch" type="button" data-action="protocol-open" data-protocol-id="${escapeAttribute(protocol.id)}">
+      <strong>${escapeHtml(protocol.title)}</strong><span>${escapeHtml(protocol.summary)}</span>
+    </button>`).join("");
+  return `
+    <div class="page-wrap climate-page">
+      <div class="page-heading"><div><h1>Climate & crisis safety</h1><p>Heat, flood, smoke, hydration, first aid, and SOS tools that keep working when connectivity fails.</p></div><button class="button button-quiet button-icon" type="button" data-action="speak" data-speak="Climate and crisis safety. Heat, flood, smoke, hydration, first aid, and SOS tools.">🔊 Read aloud</button></div>
+      <section class="card climate-hero ${risk?.heatRisk ?? "normal"}" aria-live="polite">
+        <div>
+          <p class="eyebrow">Proactive ambient safety</p>
+          <h2>${escapeHtml(risk?.label ?? "No live telemetry yet")}</h2>
+          <p>${escapeHtml(risk?.alerts[0] ?? "Load a local reading or request an Open-Meteo reading. Climate data is advisory and can be delayed.")}</p>
+        </div>
+        <div class="action-row">
+          <button class="button button-primary" type="button" data-action="refresh-climate" ${state.climateLoading ? "disabled" : ""}>${state.climateLoading ? "Loading…" : "Update local weather"}</button>
+          <button class="button button-secondary" type="button" data-action="sample-climate">Use sample heat alert</button>
+        </div>
+      </section>
+
+      <section class="climate-grid" aria-label="Climate telemetry">
+        ${climateMetric("Temperature", telemetry ? `${telemetry.temperatureC.toFixed(1)}°C` : "—", telemetry ? "Air temperature" : "No reading")}
+        ${climateMetric("Feels like", risk ? `${risk.apparentTemperatureC.toFixed(1)}°C` : "—", "Apparent temperature")}
+        ${climateMetric("Wet-bulb estimate", risk ? `${risk.wetBulbC.toFixed(1)}°C` : "—", "Screening estimate")}
+        ${climateMetric("Humidity", telemetry ? `${Math.round(telemetry.relativeHumidity)}%` : "—")}
+        ${climateMetric("PM2.5", telemetry?.pm25 !== undefined ? `${telemetry.pm25.toFixed(0)} µg/m³` : "—", "Air quality")}
+        ${climateMetric("US AQI", telemetry?.usAqi !== undefined ? `${telemetry.usAqi.toFixed(0)}` : "—", "Air-quality index")}
+        ${climateMetric("Pressure", telemetry?.pressureHpa !== undefined ? `${telemetry.pressureHpa.toFixed(0)} hPa` : "—", telemetry?.pressureChangeHpa !== undefined ? `${telemetry.pressureChangeHpa.toFixed(1)} hPa change` : "Sea-level pressure")}
+        ${climateMetric("UV index", telemetry?.uvIndex !== undefined ? telemetry.uvIndex.toFixed(1) : "—", "Sun exposure input")}
+        ${climateMetric("Soil moisture", telemetry?.soilMoisture !== undefined ? `${Math.round(telemetry.soilMoisture * 100)}%` : "—", "Ground saturation input")}
+        ${climateMetric("Rain last 48h", telemetry?.precipitation48hMm !== undefined ? `${telemetry.precipitation48hMm.toFixed(0)} mm` : "—", "Recent rainfall")}
+        ${climateMetric("Rain next 48h", telemetry?.precipitationNext48hMm !== undefined ? `${telemetry.precipitationNext48hMm.toFixed(0)} mm` : "—", "Flood watch input")}
+      </section>
+      <p class="field-help climate-attribution">Live weather and air-quality readings, when requested, use Open-Meteo and CAMS data. Manual, sample, and cached readings remain available when the service or network is unavailable.</p>
+
+      ${telemetry ? `<section class="card" aria-labelledby="risk-radar-title"><div class="result-heading"><div><h2 id="risk-radar-title">Regional risk radar</h2><p class="field-help">A local screening view from the selected reading. It is not an official warning or a landslide forecast.</p></div><a class="button button-quiet" href="${escapeAttribute(safeZoneSearchUrl(telemetry.city ?? state.facilityCity))}" target="_blank" rel="noreferrer">Find a safer place on OpenStreetMap</a></div><div class="radar-grid">${radar.map((signal) => `<article class="radar-signal ${signal.level}"><span class="radar-icon" aria-hidden="true">${signal.level === "high" ? "!" : signal.level === "watch" ? "△" : "✓"}</span><div><strong>${escapeHtml(signal.label)}</strong><span class="radar-level">${signal.level === "high" ? "High" : signal.level === "watch" ? "Watch" : "Normal"}</span><p>${escapeHtml(signal.detail)}</p></div></article>`).join("")}</div><p class="field-help">Use official local evacuation, weather, and air-quality warnings. Verify any shelter, hospital, or community centre before travelling.</p></section>` : ""}
+
+      <section class="settings-grid">
+        <section class="card" aria-labelledby="climate-settings-title">
+          <h2 id="climate-settings-title">Personal safety settings</h2>
+          <label for="climate-activity">Activity level</label>
+          <select id="climate-activity" data-climate-setting="activity">
+            <option value="rest" ${state.climateActivity === "rest" ? "selected" : ""}>Resting</option>
+            <option value="light" ${state.climateActivity === "light" ? "selected" : ""}>Light activity</option>
+            <option value="moderate" ${state.climateActivity === "moderate" ? "selected" : ""}>Moderate activity</option>
+            <option value="heavy" ${state.climateActivity === "heavy" ? "selected" : ""}>Heavy work or driving</option>
+          </select>
+          <fieldset class="climate-profiles"><legend>Protect a higher-risk person</legend>${profileOptions.map(([value, label]) => `<label class="chip"><input type="checkbox" data-profile="${value}" ${state.climateProfiles.includes(value) ? "checked" : ""}><span>${label}</span></label>`).join("")}</fieldset>
+          <div class="action-row">
+            <button class="button button-secondary" type="button" data-action="start-hydration">Start adaptive hydration</button>
+            <button class="button button-quiet" type="button" data-action="toggle-ambient">${state.climateAnnouncementsEnabled ? "Stop ambient announcements" : "Start ambient announcements"}</button>
+          </div>
+          <p class="field-help">Hydration uses a conservative interval from the reading, humidity, activity, and profile. Background alerts depend on browser notification permission and may be delayed when the OS suspends a tab.</p>
+          ${state.hydrationPlan ? `<p class="climate-status" role="status">Next hydration reminder in ${state.hydrationPlan.intervalMinutes} minutes. ${escapeHtml(state.hydrationPlan.message)}</p>` : ""}
+        </section>
+        <section class="card" aria-labelledby="climate-manual-title">
+          <h2 id="climate-manual-title">Offline manual reading</h2>
+          <form id="climate-manual-form" class="form-stack">
+            <label for="climate-temperature">Temperature °C</label><input id="climate-temperature" name="temperature" type="number" step="0.1" min="-30" max="60" value="${escapeAttribute(telemetry?.temperatureC ?? 35)}" required>
+            <label for="climate-humidity">Relative humidity %</label><input id="climate-humidity" name="humidity" type="number" step="1" min="1" max="100" value="${escapeAttribute(telemetry?.relativeHumidity ?? 70)}" required>
+            <label for="climate-wind">Wind km/h</label><input id="climate-wind" name="wind" type="number" step="0.1" min="0" max="200" value="${escapeAttribute(telemetry?.windSpeedKmh ?? 5)}">
+            <button class="button button-primary" type="submit">Calculate heat risk offline</button>
+          </form>
+        </section>
+      </section>
+
+      ${risk?.alerts.length ? `<section class="card climate-alerts" aria-labelledby="climate-alert-title"><h2 id="climate-alert-title">Active warnings</h2><ul>${risk.alerts.map((alert) => `<li>${escapeHtml(alert)}</li>`).join("")}</ul><p><strong>First aid prompt:</strong> ${escapeHtml(risk.firstAidPrompt)}</p></section>` : ""}
+
+      ${renderClimateProtocol()}
+      <section class="card" aria-labelledby="protocol-list-title"><h2 id="protocol-list-title">Offline emergency action protocols</h2><p class="field-help">These steps open instantly from the bundled app. Call emergency services first for immediate danger.</p><div class="protocol-list">${protocolButtons}</div></section>
+
+      <section class="settings-grid">
+        <section class="card" aria-labelledby="sos-title">
+          <h2 id="sos-title">Community SOS dispatch</h2>
+          <label for="sos-type">Crisis type</label><select id="sos-type" data-climate-setting="sosType"><option ${state.climateSosType === "Medical emergency" ? "selected" : ""}>Medical emergency</option><option ${state.climateSosType === "Heatstroke" ? "selected" : ""}>Heatstroke</option><option ${state.climateSosType === "Flood trapped" ? "selected" : ""}>Flood trapped</option><option ${state.climateSosType === "Wildfire smoke" ? "selected" : ""}>Wildfire smoke</option><option ${state.climateSosType === "Structural collapse" ? "selected" : ""}>Structural collapse</option></select>
+          <label for="sos-people">People needing help</label><input id="sos-people" type="number" min="1" max="100" value="${escapeAttribute(state.climateSosPeople)}" data-climate-setting="sosPeople">
+          <label for="sos-contact">Emergency contact number (optional)</label><input id="sos-contact" type="tel" value="${escapeAttribute(state.climateSosContact)}" data-climate-setting="sosContact" placeholder="+234…">
+          <p class="field-help">${escapeHtml(authority.notes)} Battery: ${state.climateBatteryPercent === null ? "unknown" : `${Math.round(state.climateBatteryPercent)}%`}.</p>
+          <div class="action-row"><a class="button button-danger" href="tel:${escapeAttribute(authority.emergencyNumbers[0])}">Call ${escapeHtml(authority.emergencyNumbers[0])}</a><a class="button button-secondary" href="${escapeAttribute(`sms:${state.climateSosContact}?body=${encodeURIComponent(sosText)}`)}">Send SOS SMS</a><a class="button button-quiet" href="${escapeAttribute(`whatsapp://send?text=${encodeURIComponent(sosText)}`)}">Share to WhatsApp</a></div>
+          <details><summary>Show SOS text</summary><pre class="sos-preview">${escapeHtml(sosText)}</pre></details>
+        </section>
+        <section class="card" aria-labelledby="beacon-title">
+          <h2 id="beacon-title">Rescue beacon</h2>
+          <p>Starts a visible non-flashing high-contrast beacon and a short 3000 Hz intermittent tone. Browser volume and device restrictions apply. Stop if it harms hearing or triggers discomfort.</p>
+          <div class="beacon-preview ${state.climateBeaconActive ? "active" : ""}" aria-live="polite">${state.climateBeaconActive ? "BEACON ACTIVE" : "Beacon ready"}</div>
+          <div class="action-row"><button class="button button-danger" type="button" data-action="toggle-beacon">${state.climateBeaconActive ? "Stop beacon" : "Start beacon"}</button><select data-climate-setting="country" aria-label="Emergency country">${routes.map((route) => `<option value="${route.countryCode}" ${state.climateCountryCode === route.countryCode ? "selected" : ""}>${escapeHtml(route.countryName)}</option>`).join("")}</select></div>
+        </section>
+      </section>
+
+      ${state.climateError ? `<p class="field-help" role="alert">${escapeHtml(state.climateError)}</p>` : ""}
+      ${state.climateLowBatteryMode ? `<section class="card low-battery-notice" role="status"><h2>Low-battery mode</h2><p>Animations and nonessential ambient checks are reduced. Keep this screen open for the emergency protocols, call controls, and SOS text.</p></section>` : ""}
     </div>`;
 }
 
@@ -859,6 +1100,8 @@ function renderCurrentScreen(): string {
       return renderTriage();
     case "scam":
       return renderScam();
+    case "climate":
+      return renderClimate();
     case "facilities":
       return renderFacilities();
     case "reminders":
@@ -938,7 +1181,7 @@ function handleClick(event: Event, root: HTMLElement): void {
     }
     case "navigate": {
       const screen = control.dataset.screen;
-      if (screen === "home" || screen === "triage" || screen === "scam" || screen === "facilities" || screen === "reminders" || screen === "settings") {
+      if (screen === "home" || screen === "triage" || screen === "scam" || screen === "climate" || screen === "facilities" || screen === "reminders" || screen === "settings") {
         navigate(screen);
       }
       break;
@@ -961,6 +1204,35 @@ function handleClick(event: Event, root: HTMLElement): void {
       break;
     case "use-location":
       requestFacilityLocation();
+      break;
+    case "refresh-climate":
+      void refreshClimateTelemetry();
+      break;
+    case "sample-climate":
+      setSampleClimateTelemetry();
+      break;
+    case "start-hydration":
+      startHydrationPlan();
+      break;
+    case "toggle-ambient":
+      toggleAmbientAnnouncements();
+      break;
+    case "protocol-open":
+      state.climateProtocolId = control.dataset.protocolId ?? null;
+      state.climateProtocolStep = 0;
+      renderApp();
+      break;
+    case "protocol-next":
+      state.climateProtocolStep += 1;
+      renderApp();
+      break;
+    case "protocol-close":
+      state.climateProtocolId = null;
+      state.climateProtocolStep = 0;
+      renderApp();
+      break;
+    case "toggle-beacon":
+      toggleRescueBeacon();
       break;
     case "share-summary":
       void shareSummary();
@@ -1006,6 +1278,8 @@ function handleInput(event: Event): void {
   if (target.dataset.field === "triageDescription") state.triageDescription = target.value.slice(0, 4000);
   if (target.dataset.field === "scamText") state.scamText = target.value.slice(0, 8000);
   if (target.dataset.field === "scamLink") state.scamLink = target.value.slice(0, 2000);
+  if (target.dataset.climateSetting === "sosContact") state.climateSosContact = target.value.slice(0, 80);
+  if (target.dataset.climateSetting === "sosPeople") state.climateSosPeople = Math.max(1, Number(target.value) || 1);
 }
 
 function handleChange(event: Event, root: HTMLElement): void {
@@ -1017,6 +1291,28 @@ function handleChange(event: Event, root: HTMLElement): void {
   }
   if (target.name === "signals" && target instanceof HTMLInputElement) {
     state.scamSignals = Array.from(root.querySelectorAll<HTMLInputElement>("input[name='signals']:checked")).map((input) => input.value);
+    return;
+  }
+  if (target.dataset.profile && target instanceof HTMLInputElement) {
+    const profile = target.dataset.profile as VulnerableProfile;
+    state.climateProfiles = target.checked
+      ? Array.from(new Set([...state.climateProfiles, profile]))
+      : state.climateProfiles.filter((item) => item !== profile);
+    if (state.climateTelemetry) state.climateRisk = calculateClimateRisk(state.climateTelemetry);
+    saveClimatePreferences();
+    renderApp();
+    return;
+  }
+  const climateSetting = target.dataset.climateSetting;
+  if (climateSetting) {
+    if (climateSetting === "activity" && ["rest", "light", "moderate", "heavy"].includes(target.value)) state.climateActivity = target.value as ActivityLevel;
+    if (climateSetting === "country") state.climateCountryCode = target.value;
+    if (climateSetting === "sosType") state.climateSosType = target.value;
+    if (climateSetting === "sosPeople") state.climateSosPeople = Math.max(1, Number(target.value) || 1);
+    if (climateSetting === "sosContact") state.climateSosContact = target.value.slice(0, 80);
+    if (state.climateTelemetry) state.hydrationPlan = makeHydrationPlan({ now: new Date(), temperatureC: state.climateTelemetry.temperatureC, relativeHumidity: state.climateTelemetry.relativeHumidity, activity: state.climateActivity, vulnerableProfiles: state.climateProfiles, reminderNumber: Math.max(1, state.hydrationReminderNumber) });
+    saveClimatePreferences();
+    renderApp();
     return;
   }
   const setting = target.dataset.setting as keyof Preferences | "language" | "facilityCity" | undefined;
@@ -1061,6 +1357,9 @@ function handleSubmit(event: SubmitEvent, root: HTMLElement): void {
   } else if (form.id === "reminder-form") {
     event.preventDefault();
     submitReminder(form, root);
+  } else if (form.id === "climate-manual-form") {
+    event.preventDefault();
+    applyManualClimateReading(form);
   }
 }
 
@@ -1252,6 +1551,7 @@ function fallbackTriage(symptoms: string[], description: string): TriageResult {
     actionSteps: [adviceForTriage(level)],
     doNotDo: ["Do not use this result to rule out a serious problem."],
     escalation: ["Call local emergency services for worsening or dangerous symptoms."],
+    waitingCare: [],
     emergencyCallNumbers: ["112"],
     disclaimer: "SafeHands is a guide, not a diagnosis.",
     shareSummary: `SafeHands triage: ${level}. ${adviceForTriage(level)}`,
@@ -1283,6 +1583,7 @@ async function evaluateTriage(input: { symptoms: string[]; description: string; 
     actionSteps: output.actionSteps,
     doNotDo: output.doNotDo,
     escalation: output.escalation,
+    waitingCare: output.waitingCare,
     emergencyCallNumbers: output.emergencyCallNumbers,
     disclaimer: output.disclaimer,
     shareSummary: output.shareSummary,
@@ -1444,6 +1745,373 @@ async function enableNotifications(): Promise<void> {
   }
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isClimateTelemetry(value: unknown): value is ClimateTelemetry {
+  if (!value || typeof value !== "object") return false;
+  const telemetry = value as Partial<ClimateTelemetry>;
+  const temperatureC = telemetry.temperatureC;
+  const relativeHumidity = telemetry.relativeHumidity;
+  const windSpeedKmh = telemetry.windSpeedKmh;
+  return typeof telemetry.observedAt === "string"
+    && isFiniteNumber(temperatureC)
+    && temperatureC >= -90
+    && temperatureC <= 70
+    && isFiniteNumber(relativeHumidity)
+    && relativeHumidity >= 0
+    && relativeHumidity <= 100
+    && isFiniteNumber(windSpeedKmh)
+    && windSpeedKmh >= 0;
+}
+
+function readClimateCache(): ClimateTelemetry | null {
+  try {
+    const raw = globalThis.localStorage?.getItem(climateTelemetryStorageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as unknown;
+    return isClimateTelemetry(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveClimateCache(telemetry: ClimateTelemetry): void {
+  try {
+    globalThis.localStorage?.setItem(climateTelemetryStorageKey, JSON.stringify(telemetry));
+  } catch {
+    // IndexedDB remains the best-effort cache when localStorage is unavailable.
+  }
+  void saveLocalSetting(climateTelemetryStorageKey, telemetry);
+}
+
+function saveClimatePreferences(): void {
+  const preferences = {
+    activity: state.climateActivity,
+    profiles: state.climateProfiles,
+    announcementMinutes: state.climateAnnouncementMinutes,
+    announcementsEnabled: state.climateAnnouncementsEnabled,
+    countryCode: state.climateCountryCode,
+  };
+  try {
+    globalThis.localStorage?.setItem(climatePreferencesStorageKey, JSON.stringify(preferences));
+  } catch {
+    // The controls remain usable for this session.
+  }
+  void saveLocalSetting(climatePreferencesStorageKey, preferences);
+}
+
+function calculateClimateRisk(telemetry: ClimateTelemetry): ClimateRisk {
+  return climateRisk({
+    temperatureC: telemetry.temperatureC,
+    relativeHumidity: telemetry.relativeHumidity,
+    windSpeedKmh: telemetry.windSpeedKmh,
+    pm25: telemetry.pm25,
+    precipitationNext48hMm: telemetry.precipitationNext48hMm,
+    pressureChangeHpa: telemetry.pressureChangeHpa,
+    vulnerableProfiles: state.climateProfiles,
+  });
+}
+
+function updateClimateTelemetry(telemetry: ClimateTelemetry, announcement = "Climate reading updated."): void {
+  state.climateTelemetry = telemetry;
+  state.climateRisk = calculateClimateRisk(telemetry);
+  state.climateError = "";
+  if (state.hydrationPlan) {
+    state.hydrationPlan = makeHydrationPlan({
+      now: new Date(),
+      temperatureC: telemetry.temperatureC,
+      relativeHumidity: telemetry.relativeHumidity,
+      activity: state.climateActivity,
+      vulnerableProfiles: state.climateProfiles,
+      reminderNumber: Math.max(1, state.hydrationReminderNumber),
+    });
+    scheduleHydrationReminder();
+  }
+  saveClimateCache(telemetry);
+  announce(announcement);
+  renderApp();
+}
+
+function setSampleClimateTelemetry(): void {
+  const location = state.facilityLocation;
+  updateClimateTelemetry({
+    observedAt: new Date().toISOString(),
+    latitude: location?.latitude,
+    longitude: location?.longitude,
+    city: "Sample heat alert",
+    countryCode: state.climateCountryCode,
+    temperatureC: 40.2,
+    relativeHumidity: 72,
+    windSpeedKmh: 6,
+    pressureHpa: 1001,
+    pressureChangeHpa: -8,
+    precipitation48hMm: 82,
+    precipitationNext48hMm: 118,
+    soilMoisture: 0.32,
+    uvIndex: 9,
+    pm25: 64,
+    usAqi: 118,
+    source: "manual",
+  }, "Sample heat, air-quality, and flood-watch reading loaded.");
+}
+
+function climateCoordinates(): Promise<{ latitude: number; longitude: number }> {
+  if (state.facilityLocation) return Promise.resolve(state.facilityLocation);
+  const cachedLocation = state.climateTelemetry;
+  if (cachedLocation && isFiniteNumber(cachedLocation.latitude) && isFiniteNumber(cachedLocation.longitude)) {
+    return Promise.resolve({ latitude: cachedLocation.latitude, longitude: cachedLocation.longitude });
+  }
+  if (typeof navigator === "undefined" || !navigator.geolocation) {
+    return Promise.reject(new Error("Location is unavailable. Use the offline manual reading."));
+  }
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+      () => reject(new Error("Location was not shared. Use the offline manual reading.")),
+      { enableHighAccuracy: false, maximumAge: 300000, timeout: 8000 },
+    );
+  });
+}
+
+async function refreshClimateTelemetry(): Promise<void> {
+  if (state.climateLoading) return;
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    const cached = readClimateCache();
+    if (cached) {
+      updateClimateTelemetry({ ...cached, source: "cached" }, "Showing the last cached climate reading. You are offline.");
+    } else {
+      state.climateError = "You are offline. Enter a manual reading or load the sample alert.";
+      announce(state.climateError);
+      renderApp();
+    }
+    return;
+  }
+  state.climateLoading = true;
+  state.climateError = "";
+  renderApp();
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timeout = typeof window !== "undefined" ? window.setTimeout(() => controller?.abort(), 10000) : null;
+  try {
+    const coordinates = await climateCoordinates();
+    const telemetry = await fetchOpenMeteoTelemetry(coordinates.latitude, coordinates.longitude, controller?.signal);
+    if (!isClimateTelemetry(telemetry)) throw new Error("Telemetry response was incomplete");
+    updateClimateTelemetry({ ...telemetry, countryCode: state.climateCountryCode }, "Live climate reading updated.");
+  } catch {
+    const cached = readClimateCache();
+    if (cached) {
+      updateClimateTelemetry({ ...cached, source: "cached" }, "Live reading failed. Showing the last cached climate reading.");
+    } else {
+      state.climateError = "Live weather was unavailable. Use the offline manual reading or sample alert; no data was sent elsewhere by SafeHands.";
+      announce(state.climateError);
+      renderApp();
+    }
+  } finally {
+    if (timeout !== null && typeof window !== "undefined") window.clearTimeout(timeout);
+    state.climateLoading = false;
+    renderApp();
+  }
+}
+
+function notifyClimate(title: string, body: string): void {
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  try {
+    new Notification(title, { body, tag: "safehands-climate" });
+  } catch {
+    // The visible in-app live region remains the fallback.
+  }
+}
+
+function scheduleHydrationReminder(): void {
+  if (typeof window === "undefined" || !state.hydrationPlan) return;
+  if (hydrationTimer !== null) window.clearTimeout(hydrationTimer);
+  const delay = Math.max(1000, new Date(state.hydrationPlan.nextReminderAt).valueOf() - Date.now());
+  hydrationTimer = window.setTimeout(() => {
+    hydrationTimer = null;
+    if (!state.climateTelemetry) return;
+    state.hydrationReminderNumber += 1;
+    state.hydrationPlan = makeHydrationPlan({
+      now: new Date(),
+      temperatureC: state.climateTelemetry.temperatureC,
+      relativeHumidity: state.climateTelemetry.relativeHumidity,
+      activity: state.climateActivity,
+      vulnerableProfiles: state.climateProfiles,
+      reminderNumber: state.hydrationReminderNumber,
+    });
+    const reminder = state.hydrationPlan.message;
+    announce(reminder);
+    notifyClimate("SafeHands hydration reminder", reminder);
+    if (state.climateAnnouncementsEnabled) speakText(reminder);
+    if (typeof navigator !== "undefined") navigator.vibrate?.([120, 80, 120]);
+    renderApp();
+    scheduleHydrationReminder();
+  }, Math.min(delay, 2_147_000_000));
+}
+
+function startHydrationPlan(): void {
+  const telemetry = state.climateTelemetry;
+  if (!telemetry) {
+    state.climateError = "Load or enter a climate reading before starting adaptive hydration.";
+    announce(state.climateError);
+    renderApp();
+    return;
+  }
+  state.hydrationReminderNumber = Math.max(1, state.hydrationReminderNumber + 1);
+  state.hydrationPlan = makeHydrationPlan({
+    now: new Date(),
+    temperatureC: telemetry.temperatureC,
+    relativeHumidity: telemetry.relativeHumidity,
+    activity: state.climateActivity,
+    vulnerableProfiles: state.climateProfiles,
+    reminderNumber: state.hydrationReminderNumber,
+  });
+  scheduleHydrationReminder();
+  announce(`Adaptive hydration started. Next reminder in ${state.hydrationPlan.intervalMinutes} minutes.`);
+  renderApp();
+}
+
+function scheduleClimateAnnouncement(): void {
+  if (typeof window === "undefined" || !state.climateAnnouncementsEnabled || !state.climateRisk) return;
+  if (climateAnnouncementTimer !== null) window.clearTimeout(climateAnnouncementTimer);
+  const delay = Math.max(60_000, state.climateAnnouncementMinutes * 60_000);
+  climateAnnouncementTimer = window.setTimeout(() => {
+    climateAnnouncementTimer = null;
+    if (!state.climateAnnouncementsEnabled || !state.climateRisk) return;
+    const text = state.climateRisk.alerts[0] ?? state.climateRisk.label;
+    announce(text);
+    notifyClimate("SafeHands climate alert", text);
+    speakText(text);
+    scheduleClimateAnnouncement();
+  }, Math.min(delay, 2_147_000_000));
+}
+
+function toggleAmbientAnnouncements(): void {
+  state.climateAnnouncementsEnabled = !state.climateAnnouncementsEnabled;
+  if (!state.climateAnnouncementsEnabled) {
+    if (climateAnnouncementTimer !== null && typeof window !== "undefined") window.clearTimeout(climateAnnouncementTimer);
+    climateAnnouncementTimer = null;
+    announce("Ambient climate announcements stopped.");
+  } else if (!state.climateRisk) {
+    state.climateAnnouncementsEnabled = false;
+    announce("Load or enter a climate reading before starting ambient announcements.");
+  } else {
+    if (typeof Notification !== "undefined" && Notification.permission === "default") void enableNotifications();
+    scheduleClimateAnnouncement();
+    announce("Ambient climate announcements started. The next check is scheduled in two hours.");
+  }
+  saveClimatePreferences();
+  renderApp();
+}
+
+function toggleRescueBeacon(): void {
+  if (state.climateBeaconActive) {
+    if (climateBeaconTimer !== null && typeof window !== "undefined") window.clearInterval(climateBeaconTimer);
+    climateBeaconTimer = null;
+    if (climateAudioContext) {
+      void climateAudioContext.close().catch(() => undefined);
+      climateAudioContext = null;
+    }
+    state.climateBeaconActive = false;
+    announce("Rescue beacon stopped.");
+    renderApp();
+    return;
+  }
+
+  const browserWindow = globalThis as unknown as BrowserWindow;
+  const AudioContextConstructor = browserWindow.AudioContext ?? browserWindow.webkitAudioContext;
+  const beep = (): void => {
+    const context = climateAudioContext;
+    if (!context) return;
+    try {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.frequency.value = 3000;
+      gain.gain.value = 0.04;
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.18);
+    } catch {
+      // The visible beacon still works when audio is blocked.
+    }
+  };
+  if (AudioContextConstructor) {
+    try {
+      const context = new AudioContextConstructor();
+      climateAudioContext = context;
+      void context.resume().catch(() => undefined);
+      beep();
+      if (typeof window !== "undefined") climateBeaconTimer = window.setInterval(beep, 1600);
+    } catch {
+      climateAudioContext = null;
+    }
+  }
+  state.climateBeaconActive = true;
+  announce(AudioContextConstructor ? "Rescue beacon started with visible and audio signals." : "Rescue beacon started with a visible signal. Audio is unavailable here.");
+  renderApp();
+}
+
+function applyManualClimateReading(form: HTMLFormElement): void {
+  const formData = new FormData(form);
+  const temperatureC = Number(formData.get("temperature"));
+  const relativeHumidity = Number(formData.get("humidity"));
+  const windSpeedKmh = Number(formData.get("wind"));
+  if (!Number.isFinite(temperatureC) || temperatureC < -30 || temperatureC > 60 || !Number.isFinite(relativeHumidity) || relativeHumidity < 1 || relativeHumidity > 100 || !Number.isFinite(windSpeedKmh) || windSpeedKmh < 0 || windSpeedKmh > 200) {
+    state.climateError = "Enter a temperature from -30 to 60°C, humidity from 1 to 100%, and wind from 0 to 200 km/h.";
+    announce(state.climateError);
+    renderApp();
+    return;
+  }
+  updateClimateTelemetry({
+    observedAt: new Date().toISOString(),
+    latitude: state.facilityLocation?.latitude ?? state.climateTelemetry?.latitude,
+    longitude: state.facilityLocation?.longitude ?? state.climateTelemetry?.longitude,
+    city: state.facilityCity,
+    countryCode: state.climateCountryCode,
+    temperatureC,
+    relativeHumidity,
+    windSpeedKmh,
+    source: "manual",
+  }, "Offline climate reading calculated.");
+}
+
+async function restoreClimateCache(): Promise<void> {
+  const localCache = readClimateCache();
+  if (localCache) {
+    updateClimateTelemetry({ ...localCache, source: "cached" }, "Last cached climate reading restored.");
+    return;
+  }
+  const indexedCache = await readLocalSetting<ClimateTelemetry>(climateTelemetryStorageKey);
+  if (isClimateTelemetry(indexedCache)) updateClimateTelemetry({ ...indexedCache, source: "cached" }, "Last cached climate reading restored.");
+}
+
+function setupClimateBatteryMonitoring(): void {
+  const browserWindow = globalThis as unknown as BrowserWindow;
+  if (!browserWindow.getBattery) return;
+  void browserWindow.getBattery().then((battery) => {
+    climateBatteryManager = battery;
+    const update = (): void => {
+      const nextPercent = Math.round(battery.level * 100);
+      const nextLowMode = battery.level <= 0.15;
+      const changed = state.climateBatteryPercent !== nextPercent || state.climateLowBatteryMode !== nextLowMode;
+      if (nextLowMode && !state.climateLowBatteryMode) {
+        state.climateAnnouncementsEnabled = false;
+        if (climateAnnouncementTimer !== null && typeof window !== "undefined") window.clearTimeout(climateAnnouncementTimer);
+        climateAnnouncementTimer = null;
+      }
+      state.climateBatteryPercent = nextPercent;
+      state.climateLowBatteryMode = nextLowMode;
+      if (changed) {
+        applyPreferences();
+        renderApp();
+      }
+    };
+    battery.addEventListener("levelchange", update);
+    update();
+  }).catch(() => undefined);
+}
+
 function requestFacilityLocation(): void {
   if (typeof navigator === "undefined" || !navigator.geolocation) {
     state.facilityLocationMessage = "Location is not available here. Choose a city manually; nothing is sent anywhere.";
@@ -1575,6 +2243,8 @@ export function mountApp(root?: HTMLElement): HTMLElement | null {
   installGlobalEvents();
   renderApp(target);
   void registerServiceWorker();
+  void restoreClimateCache();
+  setupClimateBatteryMonitoring();
   return target;
 }
 
@@ -1586,6 +2256,19 @@ export function resetAppForTests(): void {
     if (typeof window !== "undefined") window.clearTimeout(timer);
   });
   reminderTimers.clear();
+  if (typeof window !== "undefined") {
+    if (climateAnnouncementTimer !== null) window.clearTimeout(climateAnnouncementTimer);
+    if (hydrationTimer !== null) window.clearTimeout(hydrationTimer);
+    if (climateBeaconTimer !== null) window.clearInterval(climateBeaconTimer);
+  }
+  climateAnnouncementTimer = null;
+  hydrationTimer = null;
+  climateBeaconTimer = null;
+  if (climateAudioContext) {
+    void climateAudioContext.close().catch(() => undefined);
+    climateAudioContext = null;
+  }
+  climateBatteryManager = null;
   state = { ...createInitialState(), locale: null, reminders: [], preferences: { ...defaultPreferences } };
   if (mountedRoot) renderApp(mountedRoot);
 }

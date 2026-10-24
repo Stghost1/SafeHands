@@ -492,6 +492,8 @@ label,
 input[type="text"],
 input[type="datetime-local"],
 input[type="search"],
+input[type="number"],
+input[type="tel"],
 input[type="url"],
 select,
 textarea {
@@ -929,6 +931,247 @@ mark {
   border-top: 1px solid var(--border);
 }
 
+.climate-page {
+  display: grid;
+  gap: 1rem;
+}
+
+.climate-page .page-heading {
+  margin-bottom: 0;
+}
+
+.climate-attribution {
+  margin: -0.45rem 0 0;
+}
+
+.climate-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-width: 2px;
+}
+
+.climate-hero h2 {
+  margin-top: 0.25rem;
+}
+
+.climate-hero.normal {
+  border-color: var(--success);
+  background: var(--success-soft);
+}
+
+.climate-hero.amber {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.climate-hero.red {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.climate-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.climate-metric {
+  display: grid;
+  gap: 0.25rem;
+  min-height: 118px;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow);
+}
+
+.climate-metric span,
+.climate-metric small {
+  color: var(--muted);
+}
+
+.climate-metric strong {
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  line-height: 1.1;
+}
+
+.climate-profiles {
+  display: grid;
+  gap: 0.55rem;
+  margin: 1.1rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.climate-profiles legend {
+  margin-bottom: 0.45rem;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.climate-status,
+.climate-alerts,
+.protocol-step,
+.sos-preview {
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.climate-alerts {
+  border-width: 2px;
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.climate-alerts ul,
+.protocol-card ul {
+  margin: 0.7rem 0 0;
+  padding-left: 1.3rem;
+}
+
+.radar-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.radar-signal {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  min-height: 108px;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.radar-signal p {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.radar-level {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.radar-icon {
+  display: grid;
+  flex: 0 0 32px;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--success);
+  font-weight: 900;
+}
+
+.radar-signal.watch {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.radar-signal.watch .radar-icon {
+  background: var(--warning);
+}
+
+.radar-signal.high {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.radar-signal.high .radar-icon {
+  background: var(--danger);
+}
+
+.low-battery-notice {
+  border-width: 2px;
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.protocol-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.8rem;
+}
+
+.protocol-launch {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  min-height: 72px;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--surface);
+  text-align: left;
+}
+
+.protocol-launch:hover,
+.protocol-launch:focus-visible {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.protocol-launch span {
+  color: var(--muted);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.protocol-progress {
+  height: 0.65rem;
+  margin-top: 1rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.protocol-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+}
+
+.beacon-preview {
+  display: grid;
+  place-items: center;
+  min-height: 100px;
+  margin: 1rem 0;
+  border: 3px solid var(--border);
+  border-radius: 16px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.beacon-preview.active {
+  color: #fff;
+  border-color: var(--danger);
+  background: var(--danger);
+  box-shadow: 0 0 0 0.45rem color-mix(in srgb, var(--danger) 22%, transparent);
+}
+
 .footer-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1034,6 +1277,24 @@ mark {
   --danger-soft: #4a1c24;
   --focus: #ffd166;
   --shadow: 0 10px 28px rgb(0 0 0 / 35%);
+  background: var(--surface-soft);
+  color: var(--ink);
+}
+
+.low-battery-mode .app-header {
+  position: static;
+  backdrop-filter: none;
+}
+
+.low-battery-mode .climate-page .climate-metric small,
+.low-battery-mode .climate-page .field-help {
+  display: none;
+}
+
+.low-battery-mode .climate-page,
+.low-battery-mode .climate-page * {
+  animation: none !important;
+  transition: none !important;
 }
 
 .dark-mode .hero-card {
@@ -1111,6 +1372,7 @@ mark {
   }
 
   .page-heading,
+  .climate-hero,
   .emergency-banner,
   .result-heading,
   .facility-item,
@@ -1134,6 +1396,8 @@ mark {
 
   .form-grid,
   .settings-grid,
+  .climate-grid,
+  .radar-grid,
   .footer-grid,
   .language-options {
     grid-template-columns: 1fr;

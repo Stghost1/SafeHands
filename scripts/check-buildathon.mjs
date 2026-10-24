@@ -32,6 +32,9 @@ for (const required of [
   "package.json",
   "src/triage.ts",
   "src/scam.ts",
+  "src/climate.ts",
+  "src/data/climate-protocols.json",
+  "src/data/authority-directory.json",
   "public/sw.js",
 ]) requireFile(required);
 
@@ -76,7 +79,8 @@ if (!failures.some((item) => /secret-like literal/.test(item))) pass("no secret-
 const localeDirectory = file("src/data/locales");
 const localeFiles = readdirSync(localeDirectory).filter((name) => name.endsWith(".json")).sort();
 const localeKeys = localeFiles.map((name) => Object.keys(JSON.parse(readFileSync(join(localeDirectory, name), "utf8"))).sort().join("\n"));
-if (localeFiles.length === 5 && new Set(localeKeys).size === 1) pass("five locale JSON files have identical key sets");
+const expectedLocaleFiles = ["ar.json", "bn.json", "en.json", "es.json", "fr.json", "ha.json", "hi.json", "pcm.json", "pt.json", "sw.json", "yo.json"];
+if (JSON.stringify(localeFiles) === JSON.stringify(expectedLocaleFiles) && new Set(localeKeys).size === 1) pass("eleven locale JSON files have identical key sets");
 else fail("locale JSON key sets differ or a locale is missing");
 
 const fixtureCount = JSON.parse(readFileSync(file("src/data/scam-fixtures.json"), "utf8")).length;
@@ -91,10 +95,10 @@ if (existsSync(dist)) {
   else fail(`initial JavaScript is ${gzippedBytes} bytes gzipped, over 200 KB`);
   const worker = file("dist/sw.js");
   const workerText = existsSync(worker) ? readFileSync(worker, "utf8") : "";
-  for (const asset of ["./data/triage-protocol.json", "./data/facilities.json", "./data/scam-fixtures.json", "./data/locales/en.json"]) {
+  for (const asset of ["./data/triage-protocol.json", "./data/facilities.json", "./data/scam-fixtures.json", "./data/climate-protocols.json", "./data/authority-directory.json", "./data/locales/en.json"]) {
     if (!workerText.includes(asset)) fail(`generated service worker does not precache ${asset}`);
   }
-  if (workerText && !failures.some((item) => /generated service worker/.test(item))) pass("generated service worker precaches local protocol, facility, scam, and locale data");
+  if (workerText && !failures.some((item) => /generated service worker/.test(item))) pass("generated service worker precaches local health, climate, scam, and locale data");
 } else {
   fail("dist is missing; run npm run build before the checklist");
 }
