@@ -1,0 +1,12 @@
+[
+  {"countryCode":"NG","countryName":"Nigeria","numbers":["112"],"notes":"Confirm state and local disaster-agency numbers."},
+  {"countryCode":"IN","countryName":"India","numbers":["112","108"],"notes":"112 is the national emergency number; 108 is ambulance support in many areas."},
+  {"countryCode":"US","countryName":"United States","numbers":["911"],"notes":"Use 911 for immediate danger."},
+  {"countryCode":"CA","countryName":"Canada","numbers":["911"],"notes":"Use 911 for immediate danger."},
+  {"countryCode":"GB","countryName":"United Kingdom","numbers":["999","112"],"notes":"Use 999 or 112 for immediate danger."},
+  {"countryCode":"KE","countryName":"Kenya","numbers":["999","112"],"notes":"Use the number that connects in your area."},
+  {"countryCode":"UG","countryName":"Uganda","numbers":["999","112"],"notes":"Use the number that connects in your area."},
+  {"countryCode":"TZ","countryName":"Tanzania","numbers":["112","999"],"notes":"Use the number that connects in your area."},
+  {"countryCode":"AU","countryName":"Australia","numbers":["000"],"notes":"Use 000 for immediate danger."},
+  {"countryCode":"DEFAULT","countryName":"Local emergency services","numbers":["112"],"notes":"Confirm your local emergency number before relying on this route."}
+]

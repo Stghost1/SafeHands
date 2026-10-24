@@ -1,6 +1,6 @@
 # Translation status
 
-SafeHands ships English, Nigerian Pidgin, Hindi, Yoruba, and Hausa strings.
+SafeHands ships English, Nigerian Pidgin, Hindi, Yoruba, Hausa, Arabic, Bengali, French, Portuguese, Spanish, and Swahili strings.
 
 - The non-English strings in this MVP are **machine-drafted and need native speaker review**.
 - They are not clinically validated and must not replace local clinical guidance.
