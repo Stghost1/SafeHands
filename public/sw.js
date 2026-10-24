@@ -10,6 +10,8 @@ const APP_SHELL = [
   "./data/triage-protocol.json",
   "./data/facilities.json",
   "./data/scam-fixtures.json",
+  "./data/climate-protocols.json",
+  "./data/authority-directory.json",
 ];
 
 self.addEventListener("install", (event) => {

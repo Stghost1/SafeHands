@@ -1,0 +1,70 @@
+[
+  {
+    "id": "heatstroke",
+    "title": "Extreme heat and heatstroke",
+    "summary": "Confusion, fainting, seizure, very hot skin, or inability to drink can be an emergency.",
+    "steps": [
+      "Call local emergency services first and stay with the person.",
+      "Move them to shade or a cool place. Remove extra clothing.",
+      "Cool quickly with cool wet cloths, fanning, or a cool bath. Place cool packs on the neck, armpits, and groin if available.",
+      "If confused, unconscious, vomiting, or unable to swallow, give nothing by mouth and place them safely on their side if breathing normally."
+    ],
+    "doNotDo": [
+      "Do not wait for the temperature to come down before calling.",
+      "Do not give paracetamol or other fever medicine for heatstroke.",
+      "Do not leave the person alone."
+    ],
+    "emergency": true
+  },
+  {
+    "id": "flood-landslide",
+    "title": "Flash flood or landslide",
+    "summary": "Move early. Fast water can knock down a person and carry a vehicle.",
+    "steps": [
+      "Follow official evacuation instructions and move to higher, stable ground early.",
+      "If safe and only before water rises, switch off power and gas at the main controls. Never touch wet electrical equipment.",
+      "If trapped inside, go to the highest safe floor and signal for help. Do not enter a closed attic.",
+      "Stay away from moving water, bridges, unstable slopes, and downed wires."
+    ],
+    "doNotDo": [
+      "Do not walk, swim, or drive through floodwater.",
+      "Do not return to a damaged building until authorities say it is safe.",
+      "Do not guess bleach drops for drinking water. Follow the product label or local health-authority instructions; boiling is safer when fuel and a suitable container are available."
+    ],
+    "emergency": true
+  },
+  {
+    "id": "smoke-haze",
+    "title": "Wildfire smoke or toxic haze",
+    "summary": "Smoke can worsen asthma and breathing problems, especially when PM2.5 is high.",
+    "steps": [
+      "Move indoors and close windows and doors. Choose one clean-air room.",
+      "Use a well-fitting N95 or equivalent respirator if you must go outside; a loose cloth mask gives less protection from fine particles.",
+      "Use prescribed rescue medicine according to the person's existing plan. Seek urgent help for severe breathing difficulty, blue lips, or confusion.",
+      "Reduce indoor smoke: do not burn fuel, smoke, or run a generator indoors."
+    ],
+    "doNotDo": [
+      "Do not exercise outdoors during a smoke alert.",
+      "Do not use someone else's inhaler or medicine.",
+      "Do not wait if breathing is rapidly worsening."
+    ],
+    "emergency": false
+  },
+  {
+    "id": "post-flood-health",
+    "title": "Post-flood health hazards",
+    "summary": "Floodwater can contaminate wounds, food, and drinking water.",
+    "steps": [
+      "Rinse wounds with clean running water, remove visible dirt gently, cover with a clean dressing, and seek medical care for deep, dirty, puncture, or animal-contaminated wounds.",
+      "Use safe water. Boil water at a rolling boil for at least 1 minute when local guidance does not specify another method, then cool it in a covered container.",
+      "For diarrhoea, use an oral rehydration solution packet when available and follow its instructions. If no packet is available, mix 1 litre of safe drinking water with 6 level teaspoons of sugar and half a level teaspoon of salt, measure the spoons exactly, and seek care for confusion, very little urine, blood, or inability to keep fluids down.",
+      "Reduce mosquito exposure with long sleeves, nets, and approved repellent."
+    ],
+    "doNotDo": [
+      "Do not scrub deep wounds or pour harsh chemicals into them.",
+      "Do not drink untreated floodwater or use it to prepare food.",
+      "Do not delay care for fever after floodwater exposure, severe diarrhoea, or worsening wounds."
+    ],
+    "emergency": false
+  }
+]

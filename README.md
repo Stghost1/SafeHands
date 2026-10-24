@@ -1,11 +1,12 @@
 # SafeHands
 
-SafeHands is a free, offline-first installable web app for the Frontier Buildathon **Human × AI** track. It gives people in Nigeria, India, and the wider Global South two plain-language, emergency-first tools:
+SafeHands is a free, offline-first installable web app for the Frontier Buildathon **Human × AI** track. It gives people in Nigeria, India, and the wider Global South three plain-language, emergency-first tools:
 
 - **Health triage:** describe symptoms by text, optional voice, or tap-through symptom chips. SafeHands returns a cautious next-step level: emergency, urgent, routine, or monitor.
 - **Scam Shield:** paste a suspicious SMS, WhatsApp, UPI, bank, courier, job, loan, or investment message and receive an explainable verdict: `SCAM`, `SUSPICIOUS`, or `LIKELY SAFE`.
+- **Climate and crisis safety:** calculate heat risk from a manual reading or an explicitly requested Open-Meteo reading, start adaptive hydration reminders, open bundled emergency protocols, and prepare local SOS text without requiring network access.
 
-The MVP is deliberately small. Core decisions are local, deterministic, and rules-based so the demo and tests work with DNS and network access disabled.
+The MVP is deliberately small. Health and scam decisions are local, deterministic, and rules-based. Climate telemetry is optional and user-triggered; manual readings, sample alerts, protocols, hydration calculations, and SOS preparation work without network access.
 
 ## Who it helps
 
@@ -58,7 +59,7 @@ npm run preview
 
 On Windows, double-click [`start.bat`](start.bat) for a quick development launch. It resolves the project folder relative to the batch file, runs `npm ci` only when dependencies are missing, starts Vite in a separate window, and opens `http://localhost:5173/`. It requires Node.js in the Node 22 line with npm available.
 
-The service worker is registered from the same origin. Load the app once while connected so the shell is cached, then test the triage and Scam Shield flows in airplane mode. The built worker precaches the hashed app assets, protocol JSON, facility JSON, Scam Shield corpus, locales, manifest, and icons.
+The service worker is registered from the same origin. Load the app once while connected so the shell is cached, then test the triage, Scam Shield, and climate protocol flows in airplane mode. The built worker precaches the hashed app assets, health and climate protocol JSON, authority directory, facility JSON, Scam Shield corpus, locales, manifest, and icons.
 
 ## Test and build commands
 
@@ -72,7 +73,7 @@ It runs all Vitest suites in jsdom with no network calls:
 
 - deterministic health triage and red-flag precedence;
 - deterministic Scam Shield rules, 64 labelled fixtures, precision/recall thresholds, and adversarial inputs;
-- locale key parity, language-first UI, privacy boundaries, user paths, and axe-core checks across the major screens.
+- climate formulas, hydration boundaries, SOS formatting, protocol navigation, locale key parity, language-first UI, privacy boundaries, user paths, and axe-core checks across the major screens.
 
 The complete local gate is:
 
@@ -124,9 +125,11 @@ VITE_ENABLE_OPTIONAL_LLM=false
 VITE_OPTIONAL_LLM_BASE_URL=
 ```
 
-The MVP does not read a secret, call an LLM, collect an account, send analytics, or make a remote API request. Health and scam text is held in memory only for the current view. Preferences and reminders use a small IndexedDB wrapper with a localStorage fallback for restricted web views; raw symptom and message text is not persisted.
+The MVP does not read a secret, call an LLM, collect an account, or send analytics. Health and scam text is held in memory only for the current view. Preferences, reminders, and the last non-sensitive climate reading use a small IndexedDB wrapper with a localStorage fallback for restricted web views; raw symptom and message text is not persisted.
 
-The app makes a clear consent/privacy statement in the UI: entries stay on the device, there are no ads, and there is no account requirement. Optional browser geolocation is user-initiated and only sorts the seeded facility list locally; it is not stored or sent.
+The app makes a clear consent/privacy statement in the UI: entries stay on the device, there are no ads, and there is no account requirement. Optional browser geolocation is user-initiated. Facility sorting stays local; the climate refresh action may send the chosen coordinates to Open-Meteo only after the user requests a live reading. Manual and sample climate readings do not make a network request.
+
+Live weather and air-quality results are attributed in the Climate screen to Open-Meteo and the Copernicus Atmosphere Monitoring Service (CAMS). The service is optional and has manual, sample, and cached fallbacks.
 
 ## Architecture
 
@@ -135,17 +138,20 @@ index.html                  Vite entry and skip link target
 src/main.ts                 vanilla DOM UI, speech/share/reminder adapters
 src/triage.ts               deterministic health protocol runner
 src/scam.ts                 deterministic weighted Scam Shield runner
+src/climate.ts              heat, wet-bulb, hydration, authority, and SOS helpers
 src/storage.ts              IndexedDB wrapper for non-sensitive settings
 src/data/triage-protocol.json
 src/data/facilities.json    local Akure seed plus labelled India samples
 src/data/scam-fixtures.json 64 India/Nigeria corpus examples
-src/data/locales/*.json     English, Nigerian Pidgin, Hindi, Yoruba, Hausa
+src/data/climate-protocols.json
+src/data/authority-directory.json
+src/data/locales/*.json     English, Nigerian Pidgin, Hindi, Yoruba, Hausa, Arabic, Bengali, French, Portuguese, Spanish, Swahili
 public/sw.js                development worker; build generates the final list
 scripts/generate-sw.mjs     copies local data and precaches every dist asset
 tests/                      Vitest + jsdom + axe-core suites
 ```
 
-There is no heavy framework. Vite bundles TypeScript and JSON locally. The UI imports the deterministic engines directly; there is no runtime dynamic module fetch. The service worker is same-origin only and does not contact an API.
+There is no heavy framework. Vite bundles TypeScript and JSON locally. The UI imports the deterministic engines directly; there is no runtime dynamic module fetch. The service worker is same-origin only and does not proxy remote weather requests. A user-initiated climate refresh can call Open-Meteo directly from the browser and falls back to a manual or cached reading when it fails.
 
 ### Health triage rules
 
@@ -168,6 +174,7 @@ Results distinguish `SCAM` from `SUSPICIOUS` and `LIKELY SAFE`. Every non-safe r
 - **Hard escalation:** red flags override all lower-urgency matches. If information is unclear, the engine escalates rather than reassures.
 - **No secret collection:** the app never asks the user to paste an OTP, PIN, password, full card number, recovery phrase, or other credential. The Scam Shield fixture corpus contains examples, not real credentials.
 - **No dark patterns:** no ads, accounts, analytics, forced permissions, or timed decisions. Location and notifications are optional browser capabilities.
+- **Climate limits:** wet-bulb is a screening estimate, weather data can be delayed or unavailable, browser timers can pause, and SMS/WhatsApp links do not prove that a rescue message was delivered. Call local emergency services first for immediate danger.
 - **Care directory limits:** Akure entries are local seed data without invented phone numbers. Indian entries are explicitly `SAMPLE DATA`; confirm names, opening hours, route, and contact details locally before travelling.
 - **Translation limits:** non-English strings are machine-drafted and need native speaker review. They are not clinically validated; see [`TRANSLATION_STATUS.md`](TRANSLATION_STATUS.md).
 - **Voice limits:** Web Speech API support differs by browser and device. Text, chips, visual alerts, and keyboard operation remain available. Unsupported Yoruba, Hausa, and Pidgin voices fall back honestly to text and a closest available voice when the browser provides one.
@@ -183,6 +190,12 @@ The first screen uses native-name buttons without flags:
 | `hi` | हिन्दी / Hindi | machine-drafted; needs native speaker review |
 | `yo` | Yorùbá / Yoruba | machine-drafted; needs native speaker review |
 | `ha` | Hausa | machine-drafted; needs native speaker review |
+| `ar` | العربية / Arabic | machine-drafted; needs native speaker review |
+| `bn` | বাংলা / Bengali | machine-drafted; needs native speaker review |
+| `fr` | Français / French | machine-drafted; needs native speaker review |
+| `pt` | Português / Portuguese | machine-drafted; needs native speaker review |
+| `es` | Español / Spanish | machine-drafted; needs native speaker review |
+| `sw` | Kiswahili / Swahili | machine-drafted; needs native speaker review |
 
 The locale parity test checks both the bundled JSON key sets and the synchronous UI message maps.
 
@@ -190,7 +203,7 @@ The locale parity test checks both the bundled JSON key sets and the synchronous
 
 This is a five-day solo-project MVP, not a clinical service. The rules are intentionally conservative but cannot understand every language, symptom, context, medication, or scam. False positives and false negatives remain possible. Local emergency numbers, facility availability, clinical advice, and translation quality must be checked by qualified local partners before real-world deployment.
 
-The current demo does not provide a verified live facility API, SMS/USSD gateway, WhatsApp gateway, clinician account, cloud sync, server-side CHW dashboard, or on-device speech model. No network-dependent feature is required for the demo or tests. The optional LLM adapter is a documented future seam only and is off by default.
+The current demo does not provide a verified live facility API, SMS/USSD gateway, WhatsApp gateway, clinician account, cloud sync, server-side CHW dashboard, safe-zone rescue map, or on-device speech model. Open-Meteo is an optional browser request, not a guaranteed service and not required for the demo or tests. The optional LLM adapter remains off by default.
 
 ## Roadmap after the MVP
 
@@ -231,7 +244,7 @@ These are deployment instructions, not a claim that SafeHands has been deployed 
 
 ## Two-minute demo
 
-See [`DEMO.md`](DEMO.md) for the exact scripted demo. The short version is: choose a language, submit “I cannot breathe” through a chip or optional voice, show emergency escalation and read aloud, turn on Easy Mode, paste a UPI PIN-to-receive message, and show the highlighted `SCAM` result with local reporting guidance.
+See [`DEMO.md`](DEMO.md) for the exact scripted demo. The short version is: choose a language, submit “I cannot breathe” through a chip or optional voice, show emergency escalation and read aloud, turn on Easy Mode, paste a UPI PIN-to-receive message, show the highlighted `SCAM` result, then open Climate, load the sample heat alert, start a hydration plan, and open the heatstroke protocol.
 
 ## Buildathon checklist evidence
 
@@ -239,7 +252,7 @@ The red-team matrix and acceptance gates live in [`CHECKLIST_REVIEW.md`](CHECKLI
 
 - repository history, lockfile, `.nvmrc`, Dockerfile, `.env.example`, and portable relative paths;
 - `npm test`, TypeScript, Vite build, locale parity, fixture precision/recall, and axe-core across major screens;
-- no secrets, analytics, remote API calls, unsafe link following, raw-input persistence, or unsafe HTML rendering;
+- no secrets, analytics, unrequested remote API calls, unsafe link following, raw-input persistence, or unsafe HTML rendering;
 - bundle budget, service-worker precache contents, install manifest, emergency-first text, safety disclaimer, and translation status.
 
 ## License and contribution safety
